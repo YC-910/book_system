@@ -71,44 +71,46 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* Hide GitHub / Deploy / Share / Edit toolbar */
+/* =========================
+   REMOVE TOP RIGHT ICONS ONLY
+   ========================= */
 div[data-testid="stToolbar"] {
     display: none !important;
 }
 
-/* Optional: remove extra header spacing */
+/* hide header area safely (DO NOT break sidebar) */
 header {
     visibility: hidden;
 }
 
-/* Keep sidebar toggle working (IMPORTANT) */
+/* optional: remove menu button (hamburger top-left inside header only, NOT sidebar toggle) */
 #MainMenu {
     visibility: hidden;
 }
 
-/* ❌ SAFE CLEAN MODE (DO NOT BREAK SIDEBAR TOGGLE) */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-
-/* DO NOT hide stToolbar (this caused your sidebar issue) */
-
-/* PAGE */
+/* =========================
+   PAGE STYLE
+   ========================= */
 .main .block-container{
     padding: 1rem 2.5rem;
     background: #f6f7fb;
 }
 
-/* TITLE */
+/* =========================
+   TITLE
+   ========================= */
 .title{
     text-align:center;
     font-size:56px;
     font-weight:900;
     margin-bottom:20px;
-    color:#FFFFFF;
+    color:#ffffff;
     letter-spacing:1px;
 }
 
-/* GRID */
+/* =========================
+   GRID
+   ========================= */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
@@ -117,7 +119,9 @@ footer {visibility: hidden;}
     margin-top: 14px;
 }
 
-/* BOOK CARD */
+/* =========================
+   BOOK CARD
+   ========================= */
 .book-card{
     background: linear-gradient(145deg, #ffffff, #f3f4f6);
     border-radius:18px;
@@ -145,7 +149,9 @@ footer {visibility: hidden;}
     box-shadow:0px 14px 28px rgba(0,0,0,0.18);
 }
 
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+   ========================= */
 @media (max-width: 1200px){
     .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
@@ -154,7 +160,9 @@ footer {visibility: hidden;}
     .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR (KEEP WORKING)
+   ========================= */
 section[data-testid="stSidebar"]{
     background: #0f172a;
     color: white;
