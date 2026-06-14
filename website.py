@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # =====================
-# GOOGLE AUTH (STREAMLIT SECRETS)
+# GOOGLE AUTH
 # =====================
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -20,8 +20,6 @@ scope = [
 ]
 
 service_account_info = dict(st.secrets["gcp_service_account"])
-
-# FIX KEY FORMAT (IMPORTANT)
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 
 creds = Credentials.from_service_account_info(
@@ -54,6 +52,7 @@ def load_data():
     df = df.replace(r"^\s*$", pd.NA, regex=True)
     return df
 
+
 df = load_data()
 categories = df.columns.tolist()
 
@@ -66,7 +65,9 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE
+# =====================
+# UI STYLE (CLEAN)
+# =====================
 # =====================
 st.markdown("""
 <style>
@@ -79,13 +80,24 @@ st.markdown("""
     text-align:center;
     font-size:54px;
     font-weight:900;
+    margin-bottom:10px;
 }
 
+/* GRID SYSTEM */
+.book-grid{
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: 24px;
+    row-gap: 26px;
+    margin-top: 10px;
+}
+
+/* BOOK CARD */
 .book-card{
     background:white;
     border-radius:16px;
     padding:18px;
-    min-height:130px;
+    height:140px;
 
     display:flex;
     align-items:center;
@@ -96,13 +108,27 @@ st.markdown("""
     color:black;
 
     box-shadow:0px 6px 18px rgba(0,0,0,0.12);
-    transition:0.2s;
+    transition:0.2s ease;
 }
 
 .book-card:hover{
     transform:translateY(-5px);
 }
 
+/* RESPONSIVE */
+@media (max-width: 1200px){
+    .book-grid{
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 800px){
+    .book-grid{
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* SIDEBAR */
 section[data-testid="stSidebar"]{
     background:#0f172a;
 }
@@ -154,6 +180,7 @@ for i, cat in enumerate(categories):
 
         books = df[cat].dropna().tolist()
 
+        # SEARCH
         if search:
             books = [b for b in books if search.lower() in str(b).lower()]
 
@@ -164,53 +191,13 @@ for i, cat in enumerate(categories):
             st.info("No books found")
             continue
 
-        # =========================
-        # FIXED GRID (STABLE ROWS)
-        # =========================
-        st.markdown("""
-        <style>
-        .book-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-
-            column-gap: 24px;
-            row-gap: 26px;
-
-            align-items: stretch;   /* 🔥 keeps all cards same alignment */
-        }
-
-        .book-card {
-            height: 140px;          /* 🔥 FIX HEIGHT = no jumping */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @media (max-width: 1200px) {
-            .book-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 800px) {
-            .book-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        # =========================
-        # BUILD GRID
-        # =========================
+        # =====================
+        # GRID RENDER
+        # =====================
         html = '<div class="book-grid">'
 
         for book in books:
-            html += f"""
-            <div class="book-card">
-                📖 {book}
-            </div>
-            """
+            html += f'<div class="book-card">📖 {book}</div>'
 
         html += "</div>"
 
