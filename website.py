@@ -179,6 +179,7 @@ if search:
                 <div style="color:#9ca3af;">{cat}</div>
             </div>
             """, unsafe_allow_html=True)
+st.sidebar.markdown("---")
 
 st.sidebar.metric("📚 总数", total_books)
 
