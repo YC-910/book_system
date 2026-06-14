@@ -90,7 +90,7 @@ div[data-testid="stDecoration"] {display: none !important;}
     font-size:56px;
     font-weight:900;
     margin-bottom:20px;
-    color:#000000;
+    color:#FFFFFF;
     letter-spacing:1px;
 }
 
