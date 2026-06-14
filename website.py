@@ -116,7 +116,7 @@ div[data-testid="stDecoration"] {display: none !important;}
 
     text-align:center;
 
-    font-size:20px;
+    font-size:15px;
     font-weight:800;
     color:#111827;
 
