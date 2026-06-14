@@ -7,9 +7,9 @@ from google.oauth2.service_account import Credentials
 # PAGE CONFIG
 # =====================
 st.set_page_config(
-    page_title="📚 Library Reading System",
+    page_title="📚 图书系统",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"   # ✅ keep sidebar stable
 )
 
 # =====================
@@ -66,63 +66,67 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE (PRO CLEAN READER APP)
+# UI STYLE (SAFE + CLEAN)
 # =====================
 st.markdown("""
 <style>
 
-/* REMOVE DISTRACTIONS ONLY (SAFE) */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
-
-/* PAGE */
-.main .block-container{
-    padding: 0.8rem 1.5rem;   /* tighter = less scroll feeling */
-    background: #f6f7fb;
+/* ===== RESET STREAMLIT UI (DEFAULT BEHAVIOR) ===== */
+#MainMenu {
+    visibility: visible;
 }
 
-/* TITLE */
+header {
+    visibility: visible;
+}
+
+div[data-testid="stToolbar"] {
+    display: flex !important;
+}
+
+/* ===== PAGE ===== */
+.main .block-container{
+    padding: 1rem 2.5rem;
+}
+
+/* ===== TITLE ===== */
 .title{
     text-align:center;
-    font-size:52px;
+    font-size:56px;
     font-weight:900;
-    margin: 10px 0 10px 0;
-    color:#111827;
+    margin-bottom:20px;
+    color:#FFFFFF;
 }
 
-/* GRID */
+/* ===== GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
-    column-gap: 20px;
-    row-gap: 22px;
+    column-gap: 26px;
+    row-gap: 28px;
+    margin-top: 14px;
 }
 
-/* BOOK CARD */
+/* ===== BOOK CARD ===== */
 .book-card{
-    background: white;
-    border-radius:16px;
-    padding:16px;
-    height:130px;
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    border-radius:18px;
+    padding:20px;
+    height:150px;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
     font-size:18px;
-    font-weight:700;
+    font-weight:800;
     color:#111827;
 
-    box-shadow:0px 6px 18px rgba(0,0,0,0.10);
-    transition: 0.2s ease;
+    box-shadow:0px 8px 22px rgba(0,0,0,0.10);
+    border: 1px solid #e5e7eb;
 }
 
-.book-card:hover{
-    transform: translateY(-5px);
-}
-
-/* RESPONSIVE */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px){
     .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
@@ -131,33 +135,28 @@ header {visibility: hidden;}
     .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 
-/* SIDEBAR */
-section[data-testid="stSidebar"]{
-    background:#0f172a;
-    color:white;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 # =====================
 # SIDEBAR
 # =====================
-st.sidebar.title("📚 Library Panel")
+st.sidebar.title("📚 侧边栏")
 
-search = st.sidebar.text_input("🔍 Search books")
+search = st.sidebar.text_input("🔍 寻找书本")
 
-st.sidebar.metric("📚 Total Books", total_books)
+st.sidebar.metric("📚 总数", total_books)
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("➕ Add Book")
+st.sidebar.subheader("➕ 添加书本")
 
-new_book = st.sidebar.text_input("Book name")
-category = st.sidebar.selectbox("Category", categories)
+new_book = st.sidebar.text_input("书名")
+category = st.sidebar.selectbox("种类", categories)
 
-if st.sidebar.button("Add"):
+if st.sidebar.button("确定添加"):
     if new_book.strip():
+
         headers = sheet.row_values(1)
         col_index = headers.index(category) + 1
 
@@ -170,7 +169,7 @@ if st.sidebar.button("Add"):
 # =====================
 # TITLE
 # =====================
-st.markdown('<div class="title">📚 Library Reading System</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 图书系统</div>', unsafe_allow_html=True)
 
 # =====================
 # TABS
@@ -187,7 +186,7 @@ for i, cat in enumerate(categories):
             books = [b for b in books if search.lower() in str(b).lower()]
 
         st.subheader(f"📂 {cat}")
-        st.markdown(f"### 📚 Total: {len(books)} books")
+        st.markdown(f"### 📚 共: {len(books)} 本")
 
         if not books:
             st.info("No books found")
