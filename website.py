@@ -167,9 +167,15 @@ for i, cat in enumerate(categories):
         cols = st.columns(6)
 
         for idx, book in enumerate(books):
+        
             with cols[idx % 6]:
                 st.markdown(f"""
                 <div class="book-card">
                     📖 {book}
                 </div>
                 """, unsafe_allow_html=True)
+        
+            # 👉 ADD GAP AFTER EACH ROW
+            if (idx + 1) % 6 == 0:
+                st.write("")  # spacing
+                st.write("")  # extra spacing (makes it visible)
