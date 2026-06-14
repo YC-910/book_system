@@ -21,7 +21,7 @@ scope = [
 
 service_account_info = dict(st.secrets["gcp_service_account"])
 
-# FIX PRIVATE KEY FORMAT
+# FIX KEY FORMAT (IMPORTANT)
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 
 creds = Credentials.from_service_account_info(
@@ -66,7 +66,7 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# STYLE (LIBRARY UI)
+# UI STYLE
 # =====================
 st.markdown("""
 <style>
@@ -79,10 +79,8 @@ st.markdown("""
     text-align:center;
     font-size:54px;
     font-weight:900;
-    margin-bottom:20px;
 }
 
-/* BOOK CARD */
 .book-card{
     background:white;
     border-radius:16px;
@@ -102,37 +100,11 @@ st.markdown("""
 }
 
 .book-card:hover{
-    transform:translateY(-6px);
+    transform:translateY(-5px);
 }
 
-/* GRID LAYOUT (IMPORTANT FIX) */
-.book-grid{
-    display:grid;
-    grid-template-columns: repeat(6, 1fr);
-
-    column-gap: 26px;   /* 👈 horizontal gap */
-    row-gap: 28px;      /* 👈 vertical gap */
-
-    margin-top: 15px;
-}
-
-/* RESPONSIVE */
-@media (max-width: 1200px){
-    .book-grid{
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media (max-width: 800px){
-    .book-grid{
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* SIDEBAR */
 section[data-testid="stSidebar"]{
     background:#0f172a;
-    color:white;
 }
 
 </style>
@@ -192,18 +164,14 @@ for i, cat in enumerate(categories):
             st.info("No books found")
             continue
 
-        # =====================
-        # GRID RENDER
-        # =====================
-        html = '<div class="book-grid">'
+        cols = st.columns(6)
 
-        for book in books:
-            html += f"""
-            <div class="book-card">
-                📖 {book}
-            </div>
-            """
+        for idx, book in enumerate(books):
+            with cols[idx % 6]:
+                st.markdown(f"""
+                <div class="book-card">
+                    📖 {book}
+                </div>
+                """, unsafe_allow_html=True)
 
-        html += "</div>"
-
-        st.markdown(html, unsafe_allow_html=True)
+can you make the words at the sidebar all abit different with the bg, cause it already blend in it
