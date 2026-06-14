@@ -65,57 +65,73 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# =====================
-# UI STYLE (CLEAN)
-# =====================
+# UI STYLE (READING APP PRO MODE)
 # =====================
 st.markdown("""
 <style>
 
+/* ===== REMOVE STREAMLIT UI ===== */
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}
+
+div[data-testid="stToolbar"] {display: none !important;}
+div[data-testid="stDecoration"] {display: none !important;}
+
+/* ===== PAGE LAYOUT ===== */
 .main .block-container{
-    padding: 1rem 2rem;
+    padding: 1rem 2.5rem;
+    background: #f6f7fb;
 }
 
+/* ===== TITLE ===== */
 .title{
     text-align:center;
-    font-size:54px;
+    font-size:56px;
     font-weight:900;
-    margin-bottom:10px;
+    margin-bottom:20px;
+    color:#111827;
+    letter-spacing:1px;
 }
 
-/* GRID SYSTEM */
+/* ===== GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
-    column-gap: 24px;
-    row-gap: 26px;
-    margin-top: 10px;
+    column-gap: 26px;
+    row-gap: 28px;
+    margin-top: 14px;
 }
 
-/* BOOK CARD */
+/* ===== BOOK CARD (READING APP STYLE) ===== */
 .book-card{
-    background:white;
-    border-radius:16px;
-    padding:18px;
-    height:140px;
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    border-radius:18px;
+    padding:20px;
+    height:150px;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
+    text-align:center;
+
     font-size:20px;
     font-weight:800;
-    color:black;
+    color:#111827;
 
-    box-shadow:0px 6px 18px rgba(0,0,0,0.12);
-    transition:0.2s ease;
+    box-shadow:0px 8px 22px rgba(0,0,0,0.10);
+    border: 1px solid #e5e7eb;
+
+    transition: all 0.25s ease;
 }
 
 .book-card:hover{
-    transform:translateY(-5px);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow:0px 14px 28px rgba(0,0,0,0.18);
 }
 
-/* RESPONSIVE */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px){
     .book-grid{
         grid-template-columns: repeat(4, 1fr);
@@ -128,9 +144,10 @@ st.markdown("""
     }
 }
 
-/* SIDEBAR */
+/* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"]{
-    background:#0f172a;
+    background: #0f172a;
+    color: white;
 }
 
 </style>
@@ -139,20 +156,20 @@ section[data-testid="stSidebar"]{
 # =====================
 # SIDEBAR
 # =====================
-st.sidebar.title("📚 侧边栏")
+st.sidebar.title("📚 Library Panel")
 
-search = st.sidebar.text_input("🔍 书本寻找")
+search = st.sidebar.text_input("🔍 Search books")
 
-st.sidebar.metric("📚 总书本", total_books)
+st.sidebar.metric("📚 Total Books", total_books)
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("➕ 添加书本")
+st.sidebar.subheader("➕ Add New Book")
 
-new_book = st.sidebar.text_input("书本名字")
-category = st.sidebar.selectbox("类别", categories)
+new_book = st.sidebar.text_input("Book name")
+category = st.sidebar.selectbox("Category", categories)
 
-if st.sidebar.button("添加"):
+if st.sidebar.button("Add Book"):
     if new_book.strip():
 
         headers = sheet.row_values(1)
@@ -167,7 +184,7 @@ if st.sidebar.button("添加"):
 # =====================
 # TITLE
 # =====================
-st.markdown('<div class="title">📚 图书系统</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 Library Reading System</div>', unsafe_allow_html=True)
 
 # =====================
 # TABS
@@ -180,7 +197,7 @@ for i, cat in enumerate(categories):
 
         books = df[cat].dropna().tolist()
 
-        # SEARCH
+        # SEARCH FILTER
         if search:
             books = [b for b in books if search.lower() in str(b).lower()]
 
