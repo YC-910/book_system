@@ -7,7 +7,7 @@ from google.oauth2.service_account import Credentials
 # PAGE CONFIG
 # =====================
 st.set_page_config(
-    page_title="📚 图书系统",
+    page_title="📚 Reading App",
     layout="wide"
 )
 
@@ -42,16 +42,12 @@ sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
 def load_data():
     data = sheet.get_all_values()
 
-    if not data:
-        return pd.DataFrame()
-
     df = pd.DataFrame(data)
     df.columns = df.iloc[0]
     df = df[1:]
 
     df = df.replace(r"^\s*$", pd.NA, regex=True)
     return df
-
 
 df = load_data()
 categories = df.columns.tolist()
@@ -65,94 +61,98 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# =====================
-# UI STYLE (CLEAN)
-# =====================
+# UI STYLE (MODERN READING APP)
 # =====================
 st.markdown("""
 <style>
 
-.main .block-container{
-    padding: 1rem 2rem;
+/* BACKGROUND */
+.main {
+    background: #f5f7fb;
 }
 
-.title{
+/* TITLE */
+.title {
     text-align:center;
-    font-size:54px;
+    font-size:48px;
     font-weight:900;
-    margin-bottom:10px;
+    margin-bottom:15px;
+    color:#111827;
 }
 
-/* GRID SYSTEM */
-.book-grid{
-    display:grid;
-    grid-template-columns: repeat(6, 1fr);
-    column-gap: 24px;
-    row-gap: 26px;
+/* CATEGORY CARDS (DASHBOARD STYLE) */
+.category-card {
+    background: linear-gradient(135deg, #ffffff, #f3f4f6);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    text-align: center;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+/* BOOK GRID */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 22px;
     margin-top: 10px;
 }
 
-/* BOOK CARD */
-.book-card{
-    background:white;
-    border-radius:16px;
-    padding:18px;
-    height:140px;
+/* BOOK CARD (READING STYLE) */
+.book-card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    height: 120px;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    font-size:20px;
-    font-weight:800;
-    color:black;
+    text-align: center;
 
-    box-shadow:0px 6px 18px rgba(0,0,0,0.12);
-    transition:0.2s ease;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+
+    transition: all 0.25s ease;
+    border: 1px solid #eef2f7;
 }
 
-.book-card:hover{
-    transform:translateY(-5px);
-}
-
-/* RESPONSIVE */
-@media (max-width: 1200px){
-    .book-grid{
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media (max-width: 800px){
-    .book-grid{
-        grid-template-columns: repeat(2, 1fr);
-    }
+.book-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
 /* SIDEBAR */
-section[data-testid="stSidebar"]{
-    background:#0f172a;
+section[data-testid="stSidebar"] {
+    background: #111827;
+    color: white;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # =====================
-# SIDEBAR
+# SIDEBAR (CLEAN APP STYLE)
 # =====================
-st.sidebar.title("📚 侧边栏")
+st.sidebar.title("📚 Library")
 
-search = st.sidebar.text_input("🔍 书本寻找")
+search = st.sidebar.text_input("🔍 Search book")
 
-st.sidebar.metric("📚 总书本", total_books)
+st.sidebar.metric("📖 Total Books", total_books)
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("➕ 添加书本")
+st.sidebar.subheader("➕ Add Book")
 
-new_book = st.sidebar.text_input("书本名字")
-category = st.sidebar.selectbox("类别", categories)
+new_book = st.sidebar.text_input("Book name")
+category = st.sidebar.selectbox("Category", categories)
 
-if st.sidebar.button("添加"):
+if st.sidebar.button("Add"):
     if new_book.strip():
 
         headers = sheet.row_values(1)
@@ -167,7 +167,27 @@ if st.sidebar.button("添加"):
 # =====================
 # TITLE
 # =====================
-st.markdown('<div class="title">📚 图书系统</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 Reading Dashboard</div>', unsafe_allow_html=True)
+
+# =====================
+# CATEGORY DASHBOARD (HOME UI)
+# =====================
+st.markdown("## 📂 Categories")
+
+cols = st.columns(len(categories))
+
+for i, cat in enumerate(categories):
+    count = count_books(cat)
+
+    with cols[i]:
+        st.markdown(f"""
+        <div class="category-card">
+            📚 {cat}<br>
+            <span style="font-size:20px;">{count} books</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown("---")
 
 # =====================
 # TABS
@@ -180,20 +200,15 @@ for i, cat in enumerate(categories):
 
         books = df[cat].dropna().tolist()
 
-        # SEARCH
         if search:
             books = [b for b in books if search.lower() in str(b).lower()]
 
-        st.subheader(f"📂 {cat}")
-        st.markdown(f"### 📚 Total: {len(books)} books")
+        st.markdown(f"### 📖 {cat} Books")
 
         if not books:
             st.info("No books found")
             continue
 
-        # =====================
-        # GRID RENDER
-        # =====================
         html = '<div class="book-grid">'
 
         for book in books:
