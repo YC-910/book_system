@@ -95,7 +95,7 @@ div[data-testid="stToolbar"] {
     font-size:56px;
     font-weight:900;
     margin-bottom:20px;
-    color:#111827;
+    color:#FFFFFF;
 }
 
 /* ===== GRID ===== */
