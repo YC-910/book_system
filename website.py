@@ -89,7 +89,7 @@ footer {visibility: hidden;}
     font-size:56px;
     font-weight:900;
     margin-bottom:20px;
-    color:#111827;
+    color:#FFFFFF;
     letter-spacing:1px;
 }
 
@@ -179,7 +179,7 @@ if st.sidebar.button("确定添加"):
 # =====================
 # TITLE
 # =====================
-st.markdown('<div class="title">📚 Library Reading System</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 图书系统</div>', unsafe_allow_html=True)
 
 # =====================
 # TABS
