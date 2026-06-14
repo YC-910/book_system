@@ -71,11 +71,6 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* remove only extra top UI */
-#MainMenu {visibility: hidden;}
-header {visibility: hidden;}
-footer {visibility: hidden;}
-
 /* ===== RESET STREAMLIT UI (DEFAULT BEHAVIOR) ===== */
 #MainMenu {
     visibility: visible;
