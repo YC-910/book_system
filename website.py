@@ -124,7 +124,7 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("➕ 添加书本")
 
 new_book = st.sidebar.text_input("书本名字")
-category = st.sidebar.selectbox("Category", categories)
+category = st.sidebar.selectbox("类别", categories)
 
 if st.sidebar.button("Add"):
     if new_book.strip():
