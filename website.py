@@ -126,7 +126,7 @@ st.sidebar.subheader("➕ 添加书本")
 new_book = st.sidebar.text_input("书本名字")
 category = st.sidebar.selectbox("类别", categories)
 
-if st.sidebar.button("Add"):
+if st.sidebar.button("添加"):
     if new_book.strip():
 
         headers = sheet.row_values(1)
