@@ -113,11 +113,11 @@ section[data-testid="stSidebar"]{
 # =====================
 # SIDEBAR
 # =====================
-st.sidebar.title("📚 Library")
+st.sidebar.title("📚 侧边栏")
 
-search = st.sidebar.text_input("🔍 Search book")
+search = st.sidebar.text_input("🔍 书本查询")
 
-st.sidebar.metric("📚 Total Books", total_books)
+st.sidebar.metric("📚 总数：", total_books)
 
 st.sidebar.markdown("---")
 
@@ -158,7 +158,7 @@ for i, cat in enumerate(categories):
             books = [b for b in books if search.lower() in str(b).lower()]
 
         st.subheader(f"📂 {cat}")
-        st.markdown(f"### 📚 Total: {len(books)} books")
+        st.markdown(f"### 📚 共: {len(books)} 本")
 
         if not books:
             st.info("No books found")
