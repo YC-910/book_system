@@ -200,39 +200,3 @@ for i, cat in enumerate(categories):
         html += "</div>"
 
         st.markdown(html, unsafe_allow_html=True)
-
-# =====================
-# SEARCH RESULT SECTION
-# =====================
-if search:
-    st.markdown("## 🔍 搜索结果")
-
-    results = []
-
-    for cat in categories:
-        books = df[cat].dropna().tolist()
-
-        for book in books:
-            if search.lower() in str(book).lower():
-                results.append((book, cat))
-
-    if not results:
-        st.info("No matching books found")
-    else:
-        for book, cat in results:
-            st.markdown(f"""
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                padding:10px 14px;
-                margin:6px 0;
-                border-radius:10px;
-                background:#ffffff;
-                border:1px solid #e5e7eb;
-                box-shadow:0px 2px 6px rgba(0,0,0,0.05);
-                font-size:16px;
-            ">
-                <div>📖 {book}</div>
-                <div style="color:#6b7280; font-weight:600;">{cat}</div>
-            </div>
-            """, unsafe_allow_html=True)
