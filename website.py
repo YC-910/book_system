@@ -107,6 +107,10 @@ section[data-testid="stSidebar"]{
     background:#0f172a;
 }
 
+.book-row-gap {
+    height: 22px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -164,18 +168,44 @@ for i, cat in enumerate(categories):
             st.info("No books found")
             continue
 
-        cols = st.columns(6)
+        # =========================
+        # GRID STYLE (IMPORTANT FIX)
+        # =========================
+        st.markdown("""
+        <style>
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 18px;   /* 🔥 THIS IS THE REAL GAP */
+            margin-top: 10px;
+        }
 
-        for idx, book in enumerate(books):
-        
-            with cols[idx % 6]:
-                st.markdown(f"""
-                <div class="book-card">
-                    📖 {book}
-                </div>
-                """, unsafe_allow_html=True)
-        
-            # 👉 ADD GAP AFTER EACH ROW
-            if (idx + 1) % 6 == 0:
-                st.write("")  # spacing
-                st.write("")  # extra spacing (makes it visible)
+        @media (max-width: 1200px) {
+            .book-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .book-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # =========================
+        # RENDER GRID
+        # =========================
+        grid_html = '<div class="book-grid">'
+
+        for book in books:
+            grid_html += f"""
+            <div class="book-card">
+                📖 {book}
+            </div>
+            """
+
+        grid_html += "</div>"
+
+        st.markdown(grid_html, unsafe_allow_html=True)
