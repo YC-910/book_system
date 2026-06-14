@@ -117,7 +117,7 @@ st.sidebar.title("📚 侧边栏")
 
 search = st.sidebar.text_input("🔍 书本寻找")
 
-st.sidebar.metric("📚 总数本", total_books)
+st.sidebar.metric("📚 总书本", total_books)
 
 st.sidebar.markdown("---")
 
