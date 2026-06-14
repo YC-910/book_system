@@ -8,7 +8,8 @@ from google.oauth2.service_account import Credentials
 # =====================
 st.set_page_config(
     page_title="📚 图书系统",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"   # ✅ keep sidebar stable
 )
 
 # =====================
@@ -65,36 +66,34 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE (READING APP PRO MODE)
+# UI STYLE (SAFE + CLEAN)
 # =====================
 st.markdown("""
 <style>
 
-/* ===== REMOVE STREAMLIT UI ===== */
+/* ❌ SAFE CLEAN MODE (DO NOT BREAK SIDEBAR TOGGLE) */
 #MainMenu {visibility: hidden;}
-header {visibility: hidden;}
 footer {visibility: hidden;}
 
-div[data-testid="stToolbar"] {display: none !important;}
-div[data-testid="stDecoration"] {display: none !important;}
+/* DO NOT hide stToolbar (this caused your sidebar issue) */
 
-/* ===== PAGE LAYOUT ===== */
+/* PAGE */
 .main .block-container{
     padding: 1rem 2.5rem;
     background: #f6f7fb;
 }
 
-/* ===== TITLE ===== */
+/* TITLE */
 .title{
     text-align:center;
     font-size:56px;
     font-weight:900;
     margin-bottom:20px;
-    color:#FFFFFF;
+    color:#111827;
     letter-spacing:1px;
 }
 
-/* ===== GRID ===== */
+/* GRID */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
@@ -103,7 +102,7 @@ div[data-testid="stDecoration"] {display: none !important;}
     margin-top: 14px;
 }
 
-/* ===== BOOK CARD (READING APP STYLE) ===== */
+/* BOOK CARD */
 .book-card{
     background: linear-gradient(145deg, #ffffff, #f3f4f6);
     border-radius:18px;
@@ -131,20 +130,16 @@ div[data-testid="stDecoration"] {display: none !important;}
     box-shadow:0px 14px 28px rgba(0,0,0,0.18);
 }
 
-/* ===== RESPONSIVE ===== */
+/* RESPONSIVE */
 @media (max-width: 1200px){
-    .book-grid{
-        grid-template-columns: repeat(4, 1fr);
-    }
+    .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
 
 @media (max-width: 800px){
-    .book-grid{
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 section[data-testid="stSidebar"]{
     background: #0f172a;
     color: white;
@@ -184,7 +179,7 @@ if st.sidebar.button("确定添加"):
 # =====================
 # TITLE
 # =====================
-st.markdown('<div class="title">📚 图书系统</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 Library Reading System</div>', unsafe_allow_html=True)
 
 # =====================
 # TABS
@@ -197,7 +192,6 @@ for i, cat in enumerate(categories):
 
         books = df[cat].dropna().tolist()
 
-        # SEARCH FILTER
         if search:
             books = [b for b in books if search.lower() in str(b).lower()]
 
@@ -208,9 +202,6 @@ for i, cat in enumerate(categories):
             st.info("No books found")
             continue
 
-        # =====================
-        # GRID RENDER
-        # =====================
         html = '<div class="book-grid">'
 
         for book in books:
