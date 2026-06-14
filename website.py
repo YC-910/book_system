@@ -19,9 +19,8 @@ scope = [
     "https://www.googleapis.com/auth/drive"
 ]
 
+# FIX SECRET FORMAT
 service_account_info = dict(st.secrets["gcp_service_account"])
-
-# FIX PRIVATE KEY FORMAT
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 
 creds = Credentials.from_service_account_info(
@@ -31,13 +30,15 @@ creds = Credentials.from_service_account_info(
 
 client = gspread.authorize(creds)
 
-SHEET_ID = "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
-
+# =====================================
+# SHEET CONFIG
+# =====================================
+SHEET_ID = "YOUR_SHEET_ID"
 spreadsheet = client.open_by_key(SHEET_ID)
 sheet = spreadsheet.worksheet("纸质书")
 
 # =====================================
-# LOAD DATA (SAFE)
+# LOAD DATA
 # =====================================
 @st.cache_data(ttl=60)
 def load_data():
@@ -50,27 +51,25 @@ def load_data():
     df.columns = df.iloc[0]
     df = df[1:]
 
-    # clean empty spaces
+    # clean empty
     df = df.replace(r"^\s*$", pd.NA, regex=True)
 
     return df
 
 df = load_data()
-
 categories = df.columns.tolist()
 
 # =====================================
-# CLEAN CATEGORY COUNT (FIXED)
+# COUNT FIX
 # =====================================
-category_counts = {
-    col: df[col].dropna().shape[0]
-    for col in categories
-}
+def count_books(col):
+    return df[col].dropna().shape[0]
 
+category_counts = {col: count_books(col) for col in categories}
 total_books = sum(category_counts.values())
 
 # =====================================
-# STYLE (LIBRARY UI UPGRADE)
+# STYLE (LIBRARY UI)
 # =====================================
 st.markdown("""
 <style>
@@ -84,12 +83,10 @@ st.markdown("""
     font-size:52px;
     font-weight:900;
     margin-bottom:20px;
-    color:#111;
 }
 
-/* BOOK CARD (MORE LIBRARY STYLE) */
 .book-card{
-    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    background: linear-gradient(145deg, #fff, #f3f4f6);
     border-radius:18px;
     padding:18px;
     min-height:140px;
@@ -100,26 +97,21 @@ st.markdown("""
 
     text-align:center;
 
-    font-size:18px;
+    font-size:20px;
     font-weight:800;
-    color:#000;
+    color:black;
 
     box-shadow:0px 6px 18px rgba(0,0,0,0.12);
 
-    border:1px solid #e5e7eb;
-
-    transition:all 0.25s ease;
+    transition:0.2s;
 }
 
 .book-card:hover{
-    transform:translateY(-6px) scale(1.02);
-    box-shadow:0px 10px 25px rgba(0,0,0,0.18);
+    transform:translateY(-6px);
 }
 
-/* SIDEBAR */
 section[data-testid="stSidebar"]{
     background:#0f172a;
-    color:white;
 }
 
 </style>
@@ -128,25 +120,20 @@ section[data-testid="stSidebar"]{
 # =====================================
 # SIDEBAR
 # =====================================
-st.sidebar.title("📚 Library Menu")
+st.sidebar.title("📚 Library")
 
-search = st.sidebar.text_input("🔍 搜索书名")
-
-st.sidebar.markdown("---")
+search = st.sidebar.text_input("🔍 Search book")
 
 st.sidebar.metric("📚 Total Books", total_books)
 
 st.sidebar.markdown("---")
+st.sidebar.subheader("➕ Add Book")
 
-st.sidebar.subheader("➕ 添加新书")
+new_book = st.sidebar.text_input("Book name")
+category = st.sidebar.selectbox("Category", categories)
 
-new_book = st.sidebar.text_input("书名")
-
-category = st.sidebar.selectbox("分类", categories)
-
-if st.sidebar.button("添加书籍"):
+if st.sidebar.button("Add"):
     if new_book.strip():
-
         headers = sheet.row_values(1)
         col_index = headers.index(category) + 1
 
@@ -155,19 +142,22 @@ if st.sidebar.button("添加书籍"):
 
         sheet.update_cell(next_row, col_index, new_book)
 
-        st.sidebar.success("添加成功！")
+        st.success("Added successfully!")
         st.cache_data.clear()
         st.rerun()
 
 # =====================================
 # TITLE
 # =====================================
-st.markdown('<div class="title">📚 书橱记录系统</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 Library System</div>', unsafe_allow_html=True)
 
 # =====================================
 # TABS
 # =====================================
 tabs = st.tabs(categories)
+
+def normalize(x):
+    return str(x).replace(" ", "").lower()
 
 for i, cat in enumerate(categories):
 
@@ -175,29 +165,23 @@ for i, cat in enumerate(categories):
 
         books = df[cat].dropna().tolist()
 
-        # SEARCH FIX (CHINESE SAFE)
+        # SEARCH FIX (Chinese + English)
         if search:
-            books = [
-                b for b in books
-                if search.strip().lower() in str(b).lower()
-            ]
-
-        total = len(books)
+            books = [b for b in books if normalize(search) in normalize(b)]
 
         st.subheader(f"📂 {cat}")
-        st.markdown(f"### 📚 Total: {total} books")
+        st.markdown(f"### 📚 Total: {len(books)} books")
 
-        if total == 0:
-            st.info("没有找到书籍")
+        if not books:
+            st.info("No books found")
             continue
 
-        # SMART GRID (ADAPTIVE)
         cols = st.columns(6)
 
         for idx, book in enumerate(books):
             with cols[idx % 6]:
                 st.markdown(f"""
                 <div class="book-card">
-                    📖<br><br>{book}
+                    📖 {book}
                 </div>
                 """, unsafe_allow_html=True)
