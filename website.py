@@ -164,12 +164,54 @@ for i, cat in enumerate(categories):
             st.info("No books found")
             continue
 
-        cols = st.columns(6)
+        # =========================
+        # FIXED GRID (STABLE ROWS)
+        # =========================
+        st.markdown("""
+        <style>
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
 
-        for idx, book in enumerate(books):
-            with cols[idx % 6]:
-                st.markdown(f"""
-                <div class="book-card">
-                    📖 {book}
-                </div>
-                """, unsafe_allow_html=True)
+            column-gap: 24px;
+            row-gap: 26px;
+
+            align-items: stretch;   /* 🔥 keeps all cards same alignment */
+        }
+
+        .book-card {
+            height: 140px;          /* 🔥 FIX HEIGHT = no jumping */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 1200px) {
+            .book-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .book-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # =========================
+        # BUILD GRID
+        # =========================
+        html = '<div class="book-grid">'
+
+        for book in books:
+            html += f"""
+            <div class="book-card">
+                📖 {book}
+            </div>
+            """
+
+        html += "</div>"
+
+        st.markdown(html, unsafe_allow_html=True)
