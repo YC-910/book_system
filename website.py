@@ -71,6 +71,21 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
+/* Hide GitHub / Deploy / Share / Edit toolbar */
+div[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+/* Optional: remove extra header spacing */
+header {
+    visibility: hidden;
+}
+
+/* Keep sidebar toggle working (IMPORTANT) */
+#MainMenu {
+    visibility: hidden;
+}
+
 /* ❌ SAFE CLEAN MODE (DO NOT BREAK SIDEBAR TOGGLE) */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
