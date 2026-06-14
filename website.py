@@ -7,7 +7,7 @@ from google.oauth2.service_account import Credentials
 # PAGE CONFIG
 # =====================
 st.set_page_config(
-    page_title="📚 Library System",
+    page_title="📚 图书系统",
     layout="wide"
 )
 
@@ -113,17 +113,17 @@ section[data-testid="stSidebar"]{
 # =====================
 # SIDEBAR
 # =====================
-st.sidebar.title("📚 Library")
+st.sidebar.title("📚 侧边栏")
 
-search = st.sidebar.text_input("🔍 Search book")
+search = st.sidebar.text_input("🔍 书本寻找")
 
-st.sidebar.metric("📚 Total Books", total_books)
+st.sidebar.metric("📚 总数本", total_books)
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("➕ Add Book")
+st.sidebar.subheader("➕ 添加书本")
 
-new_book = st.sidebar.text_input("Book name")
+new_book = st.sidebar.text_input("书本名字")
 category = st.sidebar.selectbox("Category", categories)
 
 if st.sidebar.button("Add"):
