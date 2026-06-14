@@ -145,6 +145,41 @@ st.sidebar.title("📚 侧边栏")
 
 search = st.sidebar.text_input("🔍 寻找书本")
 
+# =====================
+# SEARCH RESULT (ABOVE TOTAL)
+# =====================
+if search:
+    st.sidebar.markdown("### 🔎 搜索结果")
+
+    results = []
+
+    for cat in categories:
+        books = df[cat].dropna().tolist()
+
+        for book in books:
+            if search.lower() in str(book).lower():
+                results.append((book, cat))
+
+    if not results:
+        st.sidebar.info("No matching books")
+    else:
+        for book, cat in results:
+            st.sidebar.markdown(f"""
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                padding:6px 10px;
+                margin:4px 0;
+                border-radius:8px;
+                background:#1f2937;
+                color:white;
+                font-size:13px;
+            ">
+                <div>📖 {book}</div>
+                <div style="color:#9ca3af;">{cat}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
 st.sidebar.metric("📚 总数", total_books)
 
 st.sidebar.markdown("---")
