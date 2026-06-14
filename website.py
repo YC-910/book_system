@@ -121,9 +121,9 @@ st.sidebar.metric("📚 总数：", total_books)
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("➕ Add Book")
+st.sidebar.subheader("➕ 添加书本")
 
-new_book = st.sidebar.text_input("Book name")
+new_book = st.sidebar.text_input("书本名字")
 category = st.sidebar.selectbox("Category", categories)
 
 if st.sidebar.button("Add"):
