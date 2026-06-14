@@ -7,7 +7,7 @@ from google.oauth2.service_account import Credentials
 # PAGE CONFIG
 # =====================
 st.set_page_config(
-    page_title="📚 Library Reading System",
+    page_title="📚 图书系统",
     layout="wide"
 )
 
@@ -65,12 +65,12 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE (WHITE READING APP)
+# UI STYLE (READING APP PRO MODE)
 # =====================
 st.markdown("""
 <style>
 
-/* ===== HIDE STREAMLIT UI ===== */
+/* ===== REMOVE STREAMLIT UI ===== */
 #MainMenu {visibility: hidden;}
 header {visibility: hidden;}
 footer {visibility: hidden;}
@@ -78,10 +78,10 @@ footer {visibility: hidden;}
 div[data-testid="stToolbar"] {display: none !important;}
 div[data-testid="stDecoration"] {display: none !important;}
 
-/* ===== PAGE BACKGROUND ===== */
+/* ===== PAGE LAYOUT ===== */
 .main .block-container{
     padding: 1rem 2.5rem;
-    background: #ffffff;
+    background: #f6f7fb;
 }
 
 /* ===== TITLE ===== */
@@ -91,6 +91,7 @@ div[data-testid="stDecoration"] {display: none !important;}
     font-weight:900;
     margin-bottom:20px;
     color:#111827;
+    letter-spacing:1px;
 }
 
 /* ===== GRID ===== */
@@ -102,9 +103,9 @@ div[data-testid="stDecoration"] {display: none !important;}
     margin-top: 14px;
 }
 
-/* ===== BOOK CARD ===== */
+/* ===== BOOK CARD (READING APP STYLE) ===== */
 .book-card{
-    background:#ffffff;
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
     border-radius:18px;
     padding:20px;
     height:150px;
@@ -119,15 +120,15 @@ div[data-testid="stDecoration"] {display: none !important;}
     font-weight:800;
     color:#111827;
 
-    border:1px solid #e5e7eb;
-    box-shadow:0px 4px 14px rgba(0,0,0,0.06);
+    box-shadow:0px 8px 22px rgba(0,0,0,0.10);
+    border: 1px solid #e5e7eb;
 
-    transition:all 0.25s ease;
+    transition: all 0.25s ease;
 }
 
 .book-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0px 10px 22px rgba(0,0,0,0.12);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow:0px 14px 28px rgba(0,0,0,0.18);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -143,11 +144,10 @@ div[data-testid="stDecoration"] {display: none !important;}
     }
 }
 
-/* ===== SIDEBAR (WHITE STYLE) ===== */
+/* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"]{
-    background:#ffffff;
-    color:#111827;
-    border-right:1px solid #e5e7eb;
+    background: #0f172a;
+    color: white;
 }
 
 </style>
@@ -164,7 +164,7 @@ st.sidebar.metric("📚 Total Books", total_books)
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("➕ Add Book")
+st.sidebar.subheader("➕ Add New Book")
 
 new_book = st.sidebar.text_input("Book name")
 category = st.sidebar.selectbox("Category", categories)
