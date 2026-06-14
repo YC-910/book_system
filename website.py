@@ -173,5 +173,3 @@ for i, cat in enumerate(categories):
                     📖 {book}
                 </div>
                 """, unsafe_allow_html=True)
-
-can you make the words at the sidebar all abit different with the bg, cause it already blend in it
