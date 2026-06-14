@@ -3,17 +3,17 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 
-# =========================
+# =====================
 # PAGE CONFIG
-# =========================
+# =====================
 st.set_page_config(
     page_title="📚 Library System",
     layout="wide"
 )
 
-# =========================
-# GOOGLE AUTH (FIXED)
-# =========================
+# =====================
+# GOOGLE AUTH (STREAMLIT SECRETS)
+# =====================
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -21,7 +21,7 @@ scope = [
 
 service_account_info = dict(st.secrets["gcp_service_account"])
 
-# FIX PRIVATE KEY (IMPORTANT)
+# FIX KEY FORMAT (IMPORTANT)
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 
 creds = Credentials.from_service_account_info(
@@ -31,16 +31,15 @@ creds = Credentials.from_service_account_info(
 
 client = gspread.authorize(creds)
 
-# =========================
+# =====================
 # SHEET
-# =========================
+# =====================
 SHEET_ID = "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
-spreadsheet = client.open_by_key(SHEET_ID)
-sheet = spreadsheet.worksheet("纸质书")
+sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
 
-# =========================
+# =====================
 # LOAD DATA
-# =========================
+# =====================
 @st.cache_data(ttl=60)
 def load_data():
     data = sheet.get_all_values()
@@ -58,17 +57,17 @@ def load_data():
 df = load_data()
 categories = df.columns.tolist()
 
-# =========================
+# =====================
 # COUNT
-# =========================
+# =====================
 def count_books(col):
     return df[col].dropna().shape[0]
 
 total_books = sum(count_books(c) for c in categories)
 
-# =========================
-# STYLE (LIBRARY UI)
-# =========================
+# =====================
+# UI STYLE
+# =====================
 st.markdown("""
 <style>
 
@@ -80,14 +79,13 @@ st.markdown("""
     text-align:center;
     font-size:54px;
     font-weight:900;
-    margin-bottom:20px;
 }
 
 .book-card{
-    background: white;
-    border-radius:18px;
+    background:white;
+    border-radius:16px;
     padding:18px;
-    min-height:140px;
+    min-height:130px;
 
     display:flex;
     align-items:center;
@@ -102,7 +100,7 @@ st.markdown("""
 }
 
 .book-card:hover{
-    transform:translateY(-6px) scale(1.02);
+    transform:translateY(-5px);
 }
 
 section[data-testid="stSidebar"]{
@@ -112,9 +110,9 @@ section[data-testid="stSidebar"]{
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
+# =====================
 # SIDEBAR
-# =========================
+# =====================
 st.sidebar.title("📚 Library")
 
 search = st.sidebar.text_input("🔍 Search book")
@@ -128,8 +126,9 @@ st.sidebar.subheader("➕ Add Book")
 new_book = st.sidebar.text_input("Book name")
 category = st.sidebar.selectbox("Category", categories)
 
-if st.sidebar.button("Add Book"):
+if st.sidebar.button("Add"):
     if new_book.strip():
+
         headers = sheet.row_values(1)
         col_index = headers.index(category) + 1
 
@@ -139,19 +138,20 @@ if st.sidebar.button("Add Book"):
         st.cache_data.clear()
         st.rerun()
 
-# =========================
+# =====================
 # TITLE
-# =========================
+# =====================
 st.markdown('<div class="title">📚 Library System</div>', unsafe_allow_html=True)
 
-# =========================
+# =====================
 # TABS
-# =========================
+# =====================
 tabs = st.tabs(categories)
 
 for i, cat in enumerate(categories):
 
     with tabs[i]:
+
         books = df[cat].dropna().tolist()
 
         if search:
