@@ -141,7 +141,7 @@ if st.sidebar.button("Add"):
 # =====================
 # TITLE
 # =====================
-st.markdown('<div class="title">📚 Library System</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 图书系统</div>', unsafe_allow_html=True)
 
 # =====================
 # TABS
