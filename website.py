@@ -21,7 +21,7 @@ scope = [
 
 service_account_info = dict(st.secrets["gcp_service_account"])
 
-# FIX KEY FORMAT (IMPORTANT)
+# FIX PRIVATE KEY FORMAT
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 
 creds = Credentials.from_service_account_info(
@@ -66,7 +66,7 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE
+# STYLE (LIBRARY UI)
 # =====================
 st.markdown("""
 <style>
@@ -79,8 +79,10 @@ st.markdown("""
     text-align:center;
     font-size:54px;
     font-weight:900;
+    margin-bottom:20px;
 }
 
+/* BOOK CARD */
 .book-card{
     background:white;
     border-radius:16px;
@@ -100,15 +102,37 @@ st.markdown("""
 }
 
 .book-card:hover{
-    transform:translateY(-5px);
+    transform:translateY(-6px);
 }
 
+/* GRID LAYOUT (IMPORTANT FIX) */
+.book-grid{
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+
+    column-gap: 26px;   /* 👈 horizontal gap */
+    row-gap: 28px;      /* 👈 vertical gap */
+
+    margin-top: 15px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1200px){
+    .book-grid{
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 800px){
+    .book-grid{
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* SIDEBAR */
 section[data-testid="stSidebar"]{
     background:#0f172a;
-}
-
-.book-row-gap {
-    height: 22px;
+    color:white;
 }
 
 </style>
@@ -117,17 +141,17 @@ section[data-testid="stSidebar"]{
 # =====================
 # SIDEBAR
 # =====================
-st.sidebar.title("📚 侧边栏")
+st.sidebar.title("📚 Library")
 
-search = st.sidebar.text_input("🔍 书本查询")
+search = st.sidebar.text_input("🔍 Search book")
 
-st.sidebar.metric("📚 总数：", total_books)
+st.sidebar.metric("📚 Total Books", total_books)
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("➕ 添加书本")
+st.sidebar.subheader("➕ Add Book")
 
-new_book = st.sidebar.text_input("书本名字")
+new_book = st.sidebar.text_input("Book name")
 category = st.sidebar.selectbox("Category", categories)
 
 if st.sidebar.button("Add"):
@@ -162,50 +186,24 @@ for i, cat in enumerate(categories):
             books = [b for b in books if search.lower() in str(b).lower()]
 
         st.subheader(f"📂 {cat}")
-        st.markdown(f"### 📚 共: {len(books)} 本")
+        st.markdown(f"### 📚 Total: {len(books)} books")
 
         if not books:
             st.info("No books found")
             continue
 
-        # =========================
-        # GRID STYLE (IMPORTANT FIX)
-        # =========================
-        st.markdown("""
-        <style>
-        .book-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 18px;   /* 🔥 THIS IS THE REAL GAP */
-            margin-top: 10px;
-        }
-
-        @media (max-width: 1200px) {
-            .book-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 800px) {
-            .book-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        # =========================
-        # RENDER GRID
-        # =========================
-        grid_html = '<div class="book-grid">'
+        # =====================
+        # GRID RENDER
+        # =====================
+        html = '<div class="book-grid">'
 
         for book in books:
-            grid_html += f"""
+            html += f"""
             <div class="book-card">
                 📖 {book}
             </div>
             """
 
-        grid_html += "</div>"
+        html += "</div>"
 
-        st.markdown(grid_html, unsafe_allow_html=True)
+        st.markdown(html, unsafe_allow_html=True)
