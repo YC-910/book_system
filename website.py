@@ -115,10 +115,6 @@ st.markdown("""
     font-weight:900;
     margin-bottom:20px;
     color:#ffffff;
-
-    text-shadow:
-        0 0 10px rgba(120,180,255,0.6),
-        0 0 20px rgba(120,180,255,0.4);
 }
 
 /* =======================
