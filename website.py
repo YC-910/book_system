@@ -71,18 +71,18 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* ===== SPACE + AQUARIUS BACKGROUND ===== */
+/* ===== SPACE BACKGROUND ===== */
 .stApp{
     background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 30%),
-    radial-gradient(circle at 80% 30%, rgba(120,180,255,0.08), transparent 35%),
-    radial-gradient(circle at 50% 80%, rgba(180,120,255,0.06), transparent 40%),
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.06), transparent 35%),
+    radial-gradient(circle at 80% 30%, rgba(120,180,255,0.06), transparent 40%),
     linear-gradient(180deg, #050814, #0b1026, #0a0f1f);
 
     color:white;
+    overflow:hidden;
 }
 
-/* ===== AQUARIUS CONSTELLATION OVERLAY ===== */
+/* ===== REAL AQUARIUS CONSTELLATION LAYER ===== */
 .stApp::after{
     content:"";
     position:fixed;
@@ -90,23 +90,46 @@ st.markdown("""
     left:0;
     width:100%;
     height:100%;
+
+    /* You can replace this with any real Aquarius constellation PNG */
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Aquarius_constellation_map.svg/800px-Aquarius_constellation_map.svg.png");
+
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:600px;
+
+    opacity:0.08;   /* keep it subtle */
     pointer-events:none;
-    opacity:0.18;
+
+    filter: blur(0.2px);
+    animation: floatConstellation 18s ease-in-out infinite;
+}
+
+/* gentle floating effect */
+@keyframes floatConstellation{
+    0%   { transform: translateY(0px) scale(1); }
+    50%  { transform: translateY(-10px) scale(1.02); }
+    100% { transform: translateY(0px) scale(1); }
+}
+
+/* ===== STAR DOTS ===== */
+.stApp::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
 
     background-image:
-        /* stars */
-        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8), transparent),
-        radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1px 1px at 40% 30%, rgba(255,255,255,0.7), transparent),
-        radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.7), transparent),
-        radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 120px 200px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 300px 100px, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1px 1px at 500px 300px, rgba(255,255,255,0.2), transparent);
 
-        /* constellation connecting glow lines (Aquarius style) */
-        linear-gradient(115deg, transparent 49%, rgba(120,180,255,0.15) 50%, transparent 51%),
-        linear-gradient(135deg, transparent 49%, rgba(120,180,255,0.12) 50%, transparent 51%),
-        linear-gradient(160deg, transparent 49%, rgba(120,180,255,0.10) 50%, transparent 51%);
+    background-size:400px 400px;
+    opacity:0.2;
+    pointer-events:none;
 }
 
 /* ===== TITLE ===== */
