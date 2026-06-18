@@ -71,62 +71,73 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* ===== SPACE BACKGROUND ===== */
+/* =========================
+   🌌 AQUARIUS STAR BACKGROUND
+========================= */
 .stApp{
     background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 30%),
-    radial-gradient(circle at 80% 30%, rgba(120,180,255,0.08), transparent 35%),
-    radial-gradient(circle at 50% 80%, rgba(180,120,255,0.06), transparent 40%),
+    radial-gradient(circle at 15% 20%, rgba(173,216,255,0.10), transparent 35%),
+    radial-gradient(circle at 80% 30%, rgba(140,180,255,0.08), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(180,160,255,0.06), transparent 45%),
     linear-gradient(180deg, #050814, #0b1026, #0a0f1f);
 
     color:white;
 }
 
-/* ===== STARS ===== */
+/* soft constellation stars */
 .stApp::before{
     content:"";
     position:fixed;
-    width:100%;
-    height:100%;
-    top:0;
-    left:0;
-    background-image:
-        radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 120px 200px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 300px 100px, rgba(255,255,255,0.25), transparent),
-        radial-gradient(1px 1px at 500px 300px, rgba(255,255,255,0.2), transparent);
+    inset:0;
 
-    background-size:400px 400px;
-    opacity:0.2;
-    pointer-events:none;
+    background-image:
+        radial-gradient(1.2px 1.2px at 10% 20%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 25% 70%, rgba(200,220,255,0.35), transparent),
+        radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 80% 80%, rgba(180,200,255,0.25), transparent),
+        radial-gradient(1px 1px at 40% 10%, rgba(255,255,255,0.2), transparent);
+
+    background-size: 500px 500px;
+    opacity: 0.25;
+    pointer-events: none;
 }
 
-/* ===== TITLE ===== */
+/* =========================
+   ✨ TITLE (AQUARIUS GLOW)
+========================= */
 .title{
     text-align:center;
     font-size:60px;
     font-weight:800;
 
-    color:#e6f0ff;
+    color:#dbeafe;
 
     margin:10px 0 25px 0;
 
-    text-shadow:0 0 12px rgba(120,180,255,0.25);
+    text-shadow:
+        0 0 10px rgba(120,180,255,0.25),
+        0 0 25px rgba(180,160,255,0.15);
 }
 
-/* ===== METRICS (TOP DASHBOARD) ===== */
+/* =========================
+   📊 METRICS
+========================= */
 div[data-testid="stMetric"]{
     background:rgba(255,255,255,0.06);
     padding:12px;
     border-radius:12px;
-    border:1px solid rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
 }
 
-/* ===== TABS ===== */
+/* =========================
+   📑 TABS
+========================= */
 .stTabs [data-baseweb="tab"]{
-    background:rgba(255,255,255,0.06);
+    background:rgba(255,255,255,0.05);
     border-radius:10px;
     color:#cfe3ff;
+    border:1px solid rgba(255,255,255,0.08);
 }
 
 .stTabs [aria-selected="true"]{
@@ -134,7 +145,9 @@ div[data-testid="stMetric"]{
     color:white !important;
 }
 
-/* ===== GRID ===== */
+/* =========================
+   📚 GRID
+========================= */
 .book-grid{
     display:grid;
     grid-template-columns:repeat(6,1fr);
@@ -142,15 +155,16 @@ div[data-testid="stMetric"]{
     margin-top:20px;
 }
 
-/* ===== BOOK CARD ===== */
+/* =========================
+   📖 BOOK CARD (soft cosmic glass)
+========================= */
 .book-card{
     background:rgba(255,255,255,0.06);
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(12px);
 
     border:1px solid rgba(255,255,255,0.12);
 
     border-radius:16px;
-
     height:160px;
 
     display:flex;
@@ -168,21 +182,25 @@ div[data-testid="stMetric"]{
 }
 
 .book-card:hover{
-    transform:translateY(-6px);
-    background:rgba(120,160,255,0.15);
-    box-shadow:0 10px 25px rgba(0,0,0,0.35);
+    transform:translateY(-6px) scale(1.02);
+    background:rgba(120,160,255,0.16);
+    box-shadow:0 12px 30px rgba(0,0,0,0.35);
 }
 
-/* ===== SIDEBAR ===== */
+/* =========================
+   📚 SIDEBAR (deep space)
+========================= */
 section[data-testid="stSidebar"]{
-    background:linear-gradient(180deg,#070b18,#0a1024,#0d1430);
+    background:linear-gradient(180deg,#050814,#0a1024,#0d1430);
 }
 
 section[data-testid="stSidebar"] *{
     color:#e6f0ff;
 }
 
-/* ===== SEARCH CARD ===== */
+/* =========================
+   🔎 SEARCH RESULT CARD
+========================= */
 .search-card{
     display:flex;
     justify-content:space-between;
