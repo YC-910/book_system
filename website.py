@@ -71,7 +71,9 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* ===== BACKGROUND IMAGE ===== */
+/* =======================
+   BACKGROUND IMAGE
+======================= */
 .stApp{
     background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
     background-size: cover;
@@ -80,7 +82,9 @@ st.markdown("""
     background-attachment: fixed;
 }
 
-/* ===== DARK OVERLAY FOR READABILITY ===== */
+/* =======================
+   LIGHT OVERLAY (BRIGHTER)
+======================= */
 .stApp::after{
     content:"";
     position:fixed;
@@ -88,36 +92,35 @@ st.markdown("""
     left:0;
     width:100%;
     height:100%;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0,0,0,0.12);  /* lighter so bg is brighter */
     pointer-events:none;
 }
 
-/* ===== REST OF YOUR EXISTING STYLE ===== */
-
-#MainMenu {
-    visibility: visible;
-}
-
-header {
-    visibility: visible;
-}
-
-div[data-testid="stToolbar"] {
-    display: flex !important;
-}
-
+/* =======================
+   PAGE LAYOUT
+======================= */
 .main .block-container{
     padding: 1rem 2.5rem;
 }
 
+/* =======================
+   TITLE (GLOW EFFECT)
+======================= */
 .title{
     text-align:center;
     font-size:56px;
     font-weight:900;
     margin-bottom:20px;
-    color:#FFFFFF;
+    color:#ffffff;
+
+    text-shadow:
+        0 0 10px rgba(120,180,255,0.6),
+        0 0 20px rgba(120,180,255,0.4);
 }
 
+/* =======================
+   GRID LAYOUT
+======================= */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
@@ -126,8 +129,13 @@ div[data-testid="stToolbar"] {
     margin-top: 14px;
 }
 
+/* =======================
+   BOOK CARD (BRIGHT GLASS STYLE)
+======================= */
 .book-card{
-    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+
     border-radius:18px;
     padding:20px;
     height:150px;
@@ -140,10 +148,24 @@ div[data-testid="stToolbar"] {
     font-weight:800;
     color:#111827;
 
-    box-shadow:0px 8px 22px rgba(0,0,0,0.10);
-    border: 1px solid #e5e7eb;
+    box-shadow:0px 10px 30px rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.6);
+
+    transition:0.3s ease;
 }
 
+/* =======================
+   HOVER EFFECT
+======================= */
+.book-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(120,180,255,0.25);
+    border: 1px solid rgba(120,180,255,0.5);
+}
+
+/* =======================
+   RESPONSIVE DESIGN
+======================= */
 @media (max-width: 1200px){
     .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
