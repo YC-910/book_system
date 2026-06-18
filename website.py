@@ -9,7 +9,7 @@ from google.oauth2.service_account import Credentials
 st.set_page_config(
     page_title="📚 藏书记录",
     layout="wide",
-    initial_sidebar_state="expanded"   # ✅ keep sidebar stable
+    initial_sidebar_state="expanded"
 )
 
 # =====================
@@ -66,14 +66,12 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE (SAFE + CLEAN)
+# UI STYLE
 # =====================
 st.markdown("""
 <style>
 
-/* =======================
-   BACKGROUND IMAGE
-======================= */
+/* BACKGROUND IMAGE */
 .stApp{
     background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
     background-size: cover;
@@ -82,9 +80,7 @@ st.markdown("""
     background-attachment: fixed;
 }
 
-/* =======================
-   LIGHT OVERLAY (BRIGHTER)
-======================= */
+/* LIGHT OVERLAY (VERY BRIGHT) */
 .stApp::after{
     content:"";
     position:fixed;
@@ -92,34 +88,29 @@ st.markdown("""
     left:0;
     width:100%;
     height:100%;
-
-    /* VERY LIGHT overlay (more transparent) */
     background: rgba(0,0,0,0.06);
-
     pointer-events:none;
 }
 
-/* =======================
-   PAGE LAYOUT
-======================= */
+/* PAGE LAYOUT */
 .main .block-container{
     padding: 1rem 2.5rem;
 }
 
-/* =======================
-   TITLE (GLOW EFFECT)
-======================= */
+/* TITLE */
 .title{
     text-align:center;
     font-size:56px;
     font-weight:900;
     margin-bottom:20px;
     color:#ffffff;
+
+    text-shadow:
+        0 0 10px rgba(120,180,255,0.6),
+        0 0 20px rgba(120,180,255,0.4);
 }
 
-/* =======================
-   GRID LAYOUT
-======================= */
+/* GRID */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
@@ -128,9 +119,7 @@ st.markdown("""
     margin-top: 14px;
 }
 
-/* =======================
-   BOOK CARD (BRIGHT GLASS STYLE)
-======================= */
+/* BOOK CARD */
 .book-card{
     background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(10px);
@@ -153,18 +142,13 @@ st.markdown("""
     transition:0.3s ease;
 }
 
-/* =======================
-   HOVER EFFECT
-======================= */
 .book-card:hover{
     transform: translateY(-6px);
     box-shadow: 0 15px 35px rgba(120,180,255,0.25);
     border: 1px solid rgba(120,180,255,0.5);
 }
 
-/* =======================
-   RESPONSIVE DESIGN
-======================= */
+/* RESPONSIVE */
 @media (max-width: 1200px){
     .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
@@ -183,9 +167,7 @@ st.sidebar.title("📚 侧边栏")
 
 search = st.sidebar.text_input("🔍 寻找书本")
 
-# =====================
-# SEARCH RESULT (ABOVE TOTAL)
-# =====================
+# SEARCH
 if search:
     st.sidebar.markdown("### 🔎 搜索结果")
 
@@ -217,6 +199,7 @@ if search:
                 <div style="color:#9ca3af;">{cat}</div>
             </div>
             """, unsafe_allow_html=True)
+
 st.sidebar.markdown("---")
 
 st.sidebar.metric("📚 总数", total_books)
@@ -246,31 +229,35 @@ if st.sidebar.button("确定添加"):
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
 
 # =====================
-# TABS
+# 🌟 SWIPE-LIKE CATEGORY SELECTOR (NEW)
 # =====================
-tabs = st.tabs(categories)
+selected_cat = st.radio(
+    "📂 选择分类（可左右滑动）",
+    categories,
+    horizontal=True
+)
 
-for i, cat in enumerate(categories):
+# =====================
+# CONTENT DISPLAY
+# =====================
+cat = selected_cat
 
-    with tabs[i]:
+books = df[cat].dropna().tolist()
 
-        books = df[cat].dropna().tolist()
+if search:
+    books = [b for b in books if search.lower() in str(b).lower()]
 
-        if search:
-            books = [b for b in books if search.lower() in str(b).lower()]
+st.subheader(f"📂 {cat}")
+st.markdown(f"### 📚 共: {len(books)} 本")
 
-        st.subheader(f"📂 {cat}")
-        st.markdown(f"### 📚 共: {len(books)} 本")
+if not books:
+    st.info("No books found")
+else:
+    html = '<div class="book-grid">'
 
-        if not books:
-            st.info("No books found")
-            continue
+    for book in books:
+        html += f'<div class="book-card">📖 {book}</div>'
 
-        html = '<div class="book-grid">'
+    html += "</div>"
 
-        for book in books:
-            html += f'<div class="book-card">📖 {book}</div>'
-
-        html += "</div>"
-
-        st.markdown(html, unsafe_allow_html=True)
+    st.markdown(html, unsafe_allow_html=True)
