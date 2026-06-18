@@ -236,7 +236,7 @@ section[data-testid="stSidebar"] h3{
 
     background:#00ffff11;
 
-    color:#00ffff;
+    color:#000000;
 
     transition:.3s;
 }
