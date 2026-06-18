@@ -71,7 +71,29 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* ===== RESET STREAMLIT UI (DEFAULT BEHAVIOR) ===== */
+/* ===== BACKGROUND IMAGE ===== */
+.stApp{
+    background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* ===== DARK OVERLAY FOR READABILITY ===== */
+.stApp::after{
+    content:"";
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.35);
+    pointer-events:none;
+}
+
+/* ===== REST OF YOUR EXISTING STYLE ===== */
+
 #MainMenu {
     visibility: visible;
 }
@@ -84,12 +106,10 @@ div[data-testid="stToolbar"] {
     display: flex !important;
 }
 
-/* ===== PAGE ===== */
 .main .block-container{
     padding: 1rem 2.5rem;
 }
 
-/* ===== TITLE ===== */
 .title{
     text-align:center;
     font-size:56px;
@@ -98,7 +118,6 @@ div[data-testid="stToolbar"] {
     color:#FFFFFF;
 }
 
-/* ===== GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
@@ -107,7 +126,6 @@ div[data-testid="stToolbar"] {
     margin-top: 14px;
 }
 
-/* ===== BOOK CARD ===== */
 .book-card{
     background: linear-gradient(145deg, #ffffff, #f3f4f6);
     border-radius:18px;
@@ -126,7 +144,6 @@ div[data-testid="stToolbar"] {
     border: 1px solid #e5e7eb;
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px){
     .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
