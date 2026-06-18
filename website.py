@@ -66,12 +66,12 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE (SAFE + CLEAN)
+# UI STYLE (POLISHED SPACE LIBRARY)
 # =====================
 st.markdown("""
 <style>
 
-/* ===== SPACE LIBRARY BACKGROUND ===== */
+/* ===== SPACE BACKGROUND ===== */
 .stApp{
     background:
     radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 30%),
@@ -82,7 +82,7 @@ st.markdown("""
     color:white;
 }
 
-/* subtle star dots */
+/* ===== STARS ===== */
 .stApp::before{
     content:"";
     position:fixed;
@@ -90,30 +90,36 @@ st.markdown("""
     height:100%;
     top:0;
     left:0;
-
     background-image:
         radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 80px 120px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 200px 80px, rgba(255,255,255,0.2), transparent),
-        radial-gradient(1px 1px at 300px 200px, rgba(255,255,255,0.25), transparent);
+        radial-gradient(1px 1px at 120px 200px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 300px 100px, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1px 1px at 500px 300px, rgba(255,255,255,0.2), transparent);
 
     background-size:400px 400px;
-
-    opacity:0.25;
+    opacity:0.2;
     pointer-events:none;
 }
 
 /* ===== TITLE ===== */
 .title{
     text-align:center;
-    font-size:56px;
+    font-size:60px;
     font-weight:800;
 
     color:#e6f0ff;
 
-    margin-bottom:20px;
+    margin:10px 0 25px 0;
 
-    text-shadow:0 0 10px rgba(120,180,255,0.25);
+    text-shadow:0 0 12px rgba(120,180,255,0.25);
+}
+
+/* ===== METRICS (TOP DASHBOARD) ===== */
+div[data-testid="stMetric"]{
+    background:rgba(255,255,255,0.06);
+    padding:12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.1);
 }
 
 /* ===== TABS ===== */
@@ -121,8 +127,6 @@ st.markdown("""
     background:rgba(255,255,255,0.06);
     border-radius:10px;
     color:#cfe3ff;
-
-    border:1px solid rgba(255,255,255,0.08);
 }
 
 .stTabs [aria-selected="true"]{
@@ -130,7 +134,7 @@ st.markdown("""
     color:white !important;
 }
 
-/* ===== BOOK GRID ===== */
+/* ===== GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns:repeat(6,1fr);
@@ -154,8 +158,6 @@ st.markdown("""
     justify-content:center;
 
     text-align:center;
-
-    padding:10px;
 
     font-size:18px;
     font-weight:600;
@@ -202,15 +204,6 @@ section[data-testid="stSidebar"] *{
 .search-card:hover{
     background:rgba(120,160,255,0.18);
     transform:translateX(4px);
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width:1200px){
-    .book-grid{grid-template-columns:repeat(4,1fr);}
-}
-
-@media (max-width:800px){
-    .book-grid{grid-template-columns:repeat(2,1fr);}
 }
 
 </style>
@@ -272,9 +265,9 @@ if st.sidebar.button("确定添加"):
         st.rerun()
 
 # =====================
-# TITLE
+# DASHBOARD (TOP)
 # =====================
-col1,col2,col3 = st.columns(3)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     st.metric("📚 图书总数", total_books)
@@ -282,13 +275,13 @@ with col1:
 with col2:
     st.metric("📂 分类数量", len(categories))
 
-with col3:
-    st.metric("🤖 系统状态", "ONLINE")
+# divider between search + stats (as you requested)
+st.markdown("---")
 
-st.markdown(
-    '<div class="title">📚 图书系统</div>',
-    unsafe_allow_html=True
-)
+# =====================
+# TITLE
+# =====================
+st.markdown('<div class="title">📚 宇宙图书系统</div>', unsafe_allow_html=True)
 
 # =====================
 # TABS
