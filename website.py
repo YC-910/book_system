@@ -93,9 +93,6 @@ st.markdown("""
     width:100%;
     height:100%;
 
-    /* VERY LIGHT overlay (more transparent) */
-    background: rgba(0,0,0,0.01);
-
     pointer-events:none;
 }
 
