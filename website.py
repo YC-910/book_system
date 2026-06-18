@@ -71,46 +71,62 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* ===== LIBRARY BACKGROUND ===== */
+/* ===== SPACE LIBRARY BACKGROUND ===== */
 .stApp{
-    background: linear-gradient(
-        135deg,
-        #f8f5f0,
-        #efe8dc,
-        #e8dcc6
-    );
+    background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(120,180,255,0.08), transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(180,120,255,0.06), transparent 40%),
+    linear-gradient(180deg, #050814, #0b1026, #0a0f1f);
+
+    color:white;
 }
 
-/* ===== PAGE ===== */
-.main .block-container{
-    padding:1rem 2.5rem;
+/* subtle star dots */
+.stApp::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+
+    background-image:
+        radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 80px 120px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 200px 80px, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 300px 200px, rgba(255,255,255,0.25), transparent);
+
+    background-size:400px 400px;
+
+    opacity:0.25;
+    pointer-events:none;
 }
 
 /* ===== TITLE ===== */
 .title{
     text-align:center;
-    font-size:60px;
-    font-weight:900;
+    font-size:56px;
+    font-weight:800;
 
-    color:#5c4033;
+    color:#e6f0ff;
 
     margin-bottom:20px;
 
-    font-family: Georgia, serif;
+    text-shadow:0 0 10px rgba(120,180,255,0.25);
 }
 
 /* ===== TABS ===== */
 .stTabs [data-baseweb="tab"]{
-    background:#f3ece1;
+    background:rgba(255,255,255,0.06);
     border-radius:10px;
+    color:#cfe3ff;
 
-    color:#5c4033;
-
-    transition:.3s;
+    border:1px solid rgba(255,255,255,0.08);
 }
 
 .stTabs [aria-selected="true"]{
-    background:#8b6f47 !important;
+    background:rgba(120,160,255,0.25) !important;
     color:white !important;
 }
 
@@ -124,14 +140,14 @@ st.markdown("""
 
 /* ===== BOOK CARD ===== */
 .book-card{
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(10px);
 
-    background:white;
+    border:1px solid rgba(255,255,255,0.12);
 
-    border-left:8px solid #8b6f47;
+    border-radius:16px;
 
-    border-radius:12px;
-
-    height:170px;
+    height:160px;
 
     display:flex;
     align-items:center;
@@ -139,82 +155,62 @@ st.markdown("""
 
     text-align:center;
 
-    padding:15px;
-
-    color:#3d2b1f;
+    padding:10px;
 
     font-size:18px;
-    font-weight:700;
+    font-weight:600;
 
-    box-shadow:
-    0 4px 12px rgba(0,0,0,.08);
+    color:#eaf2ff;
 
-    transition:.25s;
+    transition:0.25s ease;
 }
 
 .book-card:hover{
-
-    transform:translateY(-5px);
-
-    box-shadow:
-    0 10px 25px rgba(0,0,0,.15);
-
-    background:#fffdf8;
+    transform:translateY(-6px);
+    background:rgba(120,160,255,0.15);
+    box-shadow:0 10px 25px rgba(0,0,0,0.35);
 }
 
 /* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"]{
-    background:
-    linear-gradient(
-        180deg,
-        #5c4033,
-        #6f4e37,
-        #8b6f47
-    );
+    background:linear-gradient(180deg,#070b18,#0a1024,#0d1430);
 }
 
-/* Sidebar Text */
 section[data-testid="stSidebar"] *{
-    color:white;
+    color:#e6f0ff;
 }
 
-/* ===== SEARCH RESULT ===== */
+/* ===== SEARCH CARD ===== */
 .search-card{
-
     display:flex;
     justify-content:space-between;
 
-    padding:10px;
-
-    margin-bottom:8px;
+    padding:8px 10px;
+    margin-bottom:6px;
 
     border-radius:10px;
 
-    background:#f5eee3;
+    background:rgba(255,255,255,0.05);
 
-    color:#3d2b1f;
+    border:1px solid rgba(255,255,255,0.08);
 
-    border-left:5px solid #8b6f47;
+    color:#dbe7ff;
 
-    transition:.25s;
+    transition:0.2s;
 }
 
 .search-card:hover{
-    background:#ebe1d1;
+    background:rgba(120,160,255,0.18);
     transform:translateX(4px);
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width:1200px){
-    .book-grid{
-        grid-template-columns:repeat(4,1fr);
-    }
+    .book-grid{grid-template-columns:repeat(4,1fr);}
 }
 
 @media (max-width:800px){
-    .book-grid{
-        grid-template-columns:repeat(2,1fr);
-    }
+    .book-grid{grid-template-columns:repeat(2,1fr);}
 }
 
 </style>
