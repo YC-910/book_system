@@ -236,5 +236,3 @@ for i, cat in enumerate(categories):
         html += "</div>"
 
         st.markdown(html, unsafe_allow_html=True)
-
-can you make the UI more fasinating and can be playing around
