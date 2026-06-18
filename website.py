@@ -9,7 +9,7 @@ from google.oauth2.service_account import Credentials
 st.set_page_config(
     page_title="📚 藏书记录",
     layout="wide",
-    initial_sidebar_state="expanded"   # ✅ keep sidebar stable
+    initial_sidebar_state="expanded"
 )
 
 # =====================
@@ -49,8 +49,8 @@ def load_data():
     df = pd.DataFrame(data)
     df.columns = df.iloc[0]
     df = df[1:]
-
     df = df.replace(r"^\s*$", pd.NA, regex=True)
+
     return df
 
 
@@ -58,7 +58,7 @@ df = load_data()
 categories = df.columns.tolist()
 
 # =====================
-# COUNT
+# BOOK COUNT
 # =====================
 def count_books(col):
     return df[col].dropna().shape[0]
@@ -66,14 +66,12 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE (SAFE + CLEAN)
+# STYLES
 # =====================
 st.markdown("""
 <style>
 
-/* =======================
-   BACKGROUND IMAGE
-======================= */
+/* ===== BACKGROUND ===== */
 .stApp{
     background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
     background-size: cover;
@@ -82,30 +80,12 @@ st.markdown("""
     background-attachment: fixed;
 }
 
-/* =======================
-   LIGHT OVERLAY (BRIGHTER)
-======================= */
-.stApp::after{
-    content:"";
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-
-    pointer-events:none;
-}
-
-/* =======================
-   PAGE LAYOUT
-======================= */
+/* ===== LAYOUT ===== */
 .main .block-container{
     padding: 1rem 2.5rem;
 }
 
-/* =======================
-   TITLE (GLOW EFFECT)
-======================= */
+/* ===== TITLE ===== */
 .title{
     text-align:center;
     font-size:56px;
@@ -114,24 +94,18 @@ st.markdown("""
     color:#ffffff;
 }
 
-/* =======================
-   GRID LAYOUT
-======================= */
+/* ===== GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
-    column-gap: 26px;
-    row-gap: 28px;
+    gap: 26px;
     margin-top: 14px;
 }
 
-/* =======================
-   BOOK CARD (BRIGHT GLASS STYLE)
-======================= */
+/* ===== BOOK CARD ===== */
 .book-card{
     background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(10px);
-
     border-radius:18px;
     padding:20px;
     height:150px;
@@ -146,22 +120,16 @@ st.markdown("""
 
     box-shadow:0px 10px 30px rgba(0,0,0,0.15);
     border: 1px solid rgba(255,255,255,0.6);
-
     transition:0.3s ease;
 }
 
-/* =======================
-   HOVER EFFECT
-======================= */
 .book-card:hover{
     transform: translateY(-6px);
     box-shadow: 0 15px 35px rgba(120,180,255,0.25);
     border: 1px solid rgba(120,180,255,0.5);
 }
 
-/* =======================
-   RESPONSIVE DESIGN
-======================= */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px){
     .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
@@ -174,26 +142,28 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================
-# SIDEBAR
+# SIDEBAR UI
 # =====================
 st.sidebar.title("📚 侧边栏")
 
 search = st.sidebar.text_input("🔍 寻找书本")
 
 # =====================
-# SEARCH RESULT (ABOVE TOTAL)
+# SEARCH FUNCTION
 # =====================
+def search_books(query):
+    results = []
+    for cat in categories:
+        books = df[cat].dropna().tolist()
+        for book in books:
+            if query.lower() in str(book).lower():
+                results.append((book, cat))
+    return results
+
 if search:
     st.sidebar.markdown("### 🔎 搜索结果")
 
-    results = []
-
-    for cat in categories:
-        books = df[cat].dropna().tolist()
-
-        for book in books:
-            if search.lower() in str(book).lower():
-                results.append((book, cat))
+    results = search_books(search)
 
     if not results:
         st.sidebar.info("No matching books")
@@ -214,36 +184,37 @@ if search:
                 <div style="color:#9ca3af;">{cat}</div>
             </div>
             """, unsafe_allow_html=True)
-st.sidebar.markdown("---")
 
+st.sidebar.markdown("---")
 st.sidebar.metric("📚 总数", total_books)
-
 st.sidebar.markdown("---")
 
+# =====================
+# ADD BOOK
+# =====================
 st.sidebar.subheader("➕ 添加书本")
 
 new_book = st.sidebar.text_input("书名")
 category = st.sidebar.selectbox("种类", categories)
 
-if st.sidebar.button("确定添加"):
-    if new_book.strip():
+if st.sidebar.button("确定添加") and new_book.strip():
 
-        headers = sheet.row_values(1)
-        col_index = headers.index(category) + 1
+    headers = sheet.row_values(1)
+    col_index = headers.index(category) + 1
+    next_row = len(sheet.col_values(col_index)) + 1
 
-        next_row = len(sheet.col_values(col_index)) + 1
-        sheet.update_cell(next_row, col_index, new_book)
+    sheet.update_cell(next_row, col_index, new_book)
 
-        st.cache_data.clear()
-        st.rerun()
+    st.cache_data.clear()
+    st.rerun()
 
 # =====================
-# TITLE
+# MAIN TITLE
 # =====================
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
 
 # =====================
-# TABS
+# CATEGORY TABS
 # =====================
 tabs = st.tabs(categories)
 
