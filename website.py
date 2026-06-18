@@ -7,7 +7,7 @@ from google.oauth2.service_account import Credentials
 # PAGE CONFIG
 # =====================
 st.set_page_config(
-    page_title="📚 图书系统",
+    page_title="📚 藏书记录",
     layout="wide",
     initial_sidebar_state="expanded"   # ✅ keep sidebar stable
 )
@@ -66,174 +66,73 @@ def count_books(col):
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
-# UI STYLE (POLISHED SPACE LIBRARY)
+# UI STYLE (SAFE + CLEAN)
 # =====================
 st.markdown("""
 <style>
 
-/* ===== SPACE BACKGROUND ===== */
-.stApp{
-    background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.06), transparent 35%),
-    radial-gradient(circle at 80% 30%, rgba(120,180,255,0.06), transparent 40%),
-    linear-gradient(180deg, #050814, #0b1026, #0a0f1f);
-
-    color:white;
-    overflow:hidden;
+/* ===== RESET STREAMLIT UI (DEFAULT BEHAVIOR) ===== */
+#MainMenu {
+    visibility: visible;
 }
 
-/* ===== REAL AQUARIUS CONSTELLATION LAYER ===== */
-.stApp::after{
-    content:"";
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-
-    /* You can replace this with any real Aquarius constellation PNG */
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Aquarius_constellation_map.svg/800px-Aquarius_constellation_map.svg.png");
-
-    background-repeat:no-repeat;
-    background-position:center;
-    background-size:600px;
-
-    opacity:0.08;   /* keep it subtle */
-    pointer-events:none;
-
-    filter: blur(0.2px);
-    animation: floatConstellation 18s ease-in-out infinite;
+header {
+    visibility: visible;
 }
 
-/* gentle floating effect */
-@keyframes floatConstellation{
-    0%   { transform: translateY(0px) scale(1); }
-    50%  { transform: translateY(-10px) scale(1.02); }
-    100% { transform: translateY(0px) scale(1); }
+div[data-testid="stToolbar"] {
+    display: flex !important;
 }
 
-/* ===== STAR DOTS ===== */
-.stApp::before{
-    content:"";
-    position:fixed;
-    width:100%;
-    height:100%;
-    top:0;
-    left:0;
-
-    background-image:
-        radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 120px 200px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 300px 100px, rgba(255,255,255,0.25), transparent),
-        radial-gradient(1px 1px at 500px 300px, rgba(255,255,255,0.2), transparent);
-
-    background-size:400px 400px;
-    opacity:0.2;
-    pointer-events:none;
+/* ===== PAGE ===== */
+.main .block-container{
+    padding: 1rem 2.5rem;
 }
 
 /* ===== TITLE ===== */
 .title{
     text-align:center;
-    font-size:60px;
-    font-weight:800;
-
-    color:#e6f0ff;
-
-    margin:10px 0 25px 0;
-
-    text-shadow:0 0 12px rgba(120,180,255,0.25);
-}
-
-/* ===== METRICS ===== */
-div[data-testid="stMetric"]{
-    background:rgba(255,255,255,0.06);
-    padding:12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.1);
-}
-
-/* ===== TABS ===== */
-.stTabs [data-baseweb="tab"]{
-    background:rgba(255,255,255,0.06);
-    border-radius:10px;
-    color:#cfe3ff;
-}
-
-.stTabs [aria-selected="true"]{
-    background:rgba(120,160,255,0.25) !important;
-    color:white !important;
+    font-size:56px;
+    font-weight:900;
+    margin-bottom:20px;
+    color:#FFFFFF;
 }
 
 /* ===== GRID ===== */
 .book-grid{
     display:grid;
-    grid-template-columns:repeat(6,1fr);
-    gap:24px;
-    margin-top:20px;
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: 26px;
+    row-gap: 28px;
+    margin-top: 14px;
 }
 
 /* ===== BOOK CARD ===== */
 .book-card{
-    background:rgba(255,255,255,0.06);
-    backdrop-filter:blur(10px);
-
-    border:1px solid rgba(255,255,255,0.12);
-
-    border-radius:16px;
-    height:160px;
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    border-radius:18px;
+    padding:20px;
+    height:150px;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
-    text-align:center;
-
     font-size:18px;
-    font-weight:600;
+    font-weight:800;
+    color:#111827;
 
-    color:#eaf2ff;
-
-    transition:0.25s ease;
+    box-shadow:0px 8px 22px rgba(0,0,0,0.10);
+    border: 1px solid #e5e7eb;
 }
 
-.book-card:hover{
-    transform:translateY(-6px);
-    background:rgba(120,160,255,0.15);
-    box-shadow:0 10px 25px rgba(0,0,0,0.35);
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px){
+    .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
 
-/* ===== SIDEBAR ===== */
-section[data-testid="stSidebar"]{
-    background:linear-gradient(180deg,#070b18,#0a1024,#0d1430);
-}
-
-section[data-testid="stSidebar"] *{
-    color:#e6f0ff;
-}
-
-/* ===== SEARCH CARD ===== */
-.search-card{
-    display:flex;
-    justify-content:space-between;
-
-    padding:8px 10px;
-    margin-bottom:6px;
-
-    border-radius:10px;
-
-    background:rgba(255,255,255,0.05);
-
-    border:1px solid rgba(255,255,255,0.08);
-
-    color:#dbe7ff;
-
-    transition:0.2s;
-}
-
-.search-card:hover{
-    background:rgba(120,160,255,0.18);
-    transform:translateX(4px);
+@media (max-width: 800px){
+    .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 
 </style>
@@ -266,9 +165,18 @@ if search:
     else:
         for book, cat in results:
             st.sidebar.markdown(f"""
-            <div class="search-card">
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                padding:6px 10px;
+                margin:4px 0;
+                border-radius:8px;
+                background:#1f2937;
+                color:white;
+                font-size:13px;
+            ">
                 <div>📖 {book}</div>
-                <div>{cat}</div>
+                <div style="color:#9ca3af;">{cat}</div>
             </div>
             """, unsafe_allow_html=True)
 st.sidebar.markdown("---")
@@ -295,23 +203,9 @@ if st.sidebar.button("确定添加"):
         st.rerun()
 
 # =====================
-# DASHBOARD (TOP)
-# =====================
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric("📚 图书总数", total_books)
-
-with col2:
-    st.metric("📂 分类数量", len(categories))
-
-# divider between search + stats (as you requested)
-st.markdown("---")
-
-# =====================
 # TITLE
 # =====================
-st.markdown('<div class="title">📚 宇宙图书系统</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
 
 # =====================
 # TABS
@@ -342,3 +236,5 @@ for i, cat in enumerate(categories):
         html += "</div>"
 
         st.markdown(html, unsafe_allow_html=True)
+
+can you make the UI more fasinating and can be playing around
