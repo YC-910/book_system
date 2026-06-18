@@ -71,73 +71,70 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* =========================
-   🌌 AQUARIUS STAR BACKGROUND
-========================= */
+/* ===== SPACE + AQUARIUS BACKGROUND ===== */
 .stApp{
     background:
-    radial-gradient(circle at 15% 20%, rgba(173,216,255,0.10), transparent 35%),
-    radial-gradient(circle at 80% 30%, rgba(140,180,255,0.08), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(180,160,255,0.06), transparent 45%),
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(120,180,255,0.08), transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(180,120,255,0.06), transparent 40%),
     linear-gradient(180deg, #050814, #0b1026, #0a0f1f);
 
     color:white;
 }
 
-/* soft constellation stars */
-.stApp::before{
+/* ===== AQUARIUS CONSTELLATION OVERLAY ===== */
+.stApp::after{
     content:"";
     position:fixed;
-    inset:0;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    opacity:0.18;
 
     background-image:
-        radial-gradient(1.2px 1.2px at 10% 20%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 25% 70%, rgba(200,220,255,0.35), transparent),
-        radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 80% 80%, rgba(180,200,255,0.25), transparent),
-        radial-gradient(1px 1px at 40% 10%, rgba(255,255,255,0.2), transparent);
+        /* stars */
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 40% 30%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.5), transparent),
 
-    background-size: 500px 500px;
-    opacity: 0.25;
-    pointer-events: none;
+        /* constellation connecting glow lines (Aquarius style) */
+        linear-gradient(115deg, transparent 49%, rgba(120,180,255,0.15) 50%, transparent 51%),
+        linear-gradient(135deg, transparent 49%, rgba(120,180,255,0.12) 50%, transparent 51%),
+        linear-gradient(160deg, transparent 49%, rgba(120,180,255,0.10) 50%, transparent 51%);
 }
 
-/* =========================
-   ✨ TITLE (AQUARIUS GLOW)
-========================= */
+/* ===== TITLE ===== */
 .title{
     text-align:center;
     font-size:60px;
     font-weight:800;
 
-    color:#dbeafe;
+    color:#e6f0ff;
 
     margin:10px 0 25px 0;
 
-    text-shadow:
-        0 0 10px rgba(120,180,255,0.25),
-        0 0 25px rgba(180,160,255,0.15);
+    text-shadow:0 0 12px rgba(120,180,255,0.25);
 }
 
-/* =========================
-   📊 METRICS
-========================= */
+/* ===== METRICS ===== */
 div[data-testid="stMetric"]{
     background:rgba(255,255,255,0.06);
     padding:12px;
     border-radius:12px;
-    border:1px solid rgba(255,255,255,0.12);
-    backdrop-filter: blur(8px);
+    border:1px solid rgba(255,255,255,0.1);
 }
 
-/* =========================
-   📑 TABS
-========================= */
+/* ===== TABS ===== */
 .stTabs [data-baseweb="tab"]{
-    background:rgba(255,255,255,0.05);
+    background:rgba(255,255,255,0.06);
     border-radius:10px;
     color:#cfe3ff;
-    border:1px solid rgba(255,255,255,0.08);
 }
 
 .stTabs [aria-selected="true"]{
@@ -145,9 +142,7 @@ div[data-testid="stMetric"]{
     color:white !important;
 }
 
-/* =========================
-   📚 GRID
-========================= */
+/* ===== GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns:repeat(6,1fr);
@@ -155,12 +150,10 @@ div[data-testid="stMetric"]{
     margin-top:20px;
 }
 
-/* =========================
-   📖 BOOK CARD (soft cosmic glass)
-========================= */
+/* ===== BOOK CARD ===== */
 .book-card{
     background:rgba(255,255,255,0.06);
-    backdrop-filter:blur(12px);
+    backdrop-filter:blur(10px);
 
     border:1px solid rgba(255,255,255,0.12);
 
@@ -182,25 +175,21 @@ div[data-testid="stMetric"]{
 }
 
 .book-card:hover{
-    transform:translateY(-6px) scale(1.02);
-    background:rgba(120,160,255,0.16);
-    box-shadow:0 12px 30px rgba(0,0,0,0.35);
+    transform:translateY(-6px);
+    background:rgba(120,160,255,0.15);
+    box-shadow:0 10px 25px rgba(0,0,0,0.35);
 }
 
-/* =========================
-   📚 SIDEBAR (deep space)
-========================= */
+/* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"]{
-    background:linear-gradient(180deg,#050814,#0a1024,#0d1430);
+    background:linear-gradient(180deg,#070b18,#0a1024,#0d1430);
 }
 
 section[data-testid="stSidebar"] *{
     color:#e6f0ff;
 }
 
-/* =========================
-   🔎 SEARCH RESULT CARD
-========================= */
+/* ===== SEARCH CARD ===== */
 .search-card{
     display:flex;
     justify-content:space-between;
