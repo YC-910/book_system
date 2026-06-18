@@ -48,7 +48,6 @@ def load_data():
 
     return df
 
-
 df = load_data()
 categories = df.columns.tolist()
 
@@ -57,7 +56,6 @@ categories = df.columns.tolist()
 # =====================
 def count_books(col):
     return df[col].dropna().shape[0]
-
 
 total_books = sum(count_books(c) for c in categories)
 
@@ -158,7 +156,6 @@ def search_books(query):
             if query.lower() in str(book).lower():
                 results.append((book, cat))
     return results
-
 
 if search:
     st.sidebar.markdown("### 🔎 搜索结果")
