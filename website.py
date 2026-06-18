@@ -73,7 +73,12 @@ st.markdown("""
 
 /* ===== PAGE ===== */
 .stApp{
-    background: linear-gradient(135deg,#0f172a,#1e293b,#334155);
+    background:
+    radial-gradient(circle at top left,#00ffff22,transparent 25%),
+    radial-gradient(circle at bottom right,#8b5cf622,transparent 25%),
+    linear-gradient(135deg,#020617,#050816,#0f172a);
+
+    color:white;
 }
 
 .main .block-container{
@@ -83,29 +88,32 @@ st.markdown("""
 /* ===== TITLE ===== */
 .title{
     text-align:center;
-    font-size:64px;
+    font-size:72px;
     font-weight:900;
-    margin-bottom:20px;
 
-    background: linear-gradient(
-        90deg,
-        #60a5fa,
-        #a78bfa,
-        #f472b6
-    );
+    color:#00ffff;
 
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
+    text-shadow:
+    0 0 10px #00ffff,
+    0 0 20px #00ffff,
+    0 0 40px #00ffff;
 
-    animation: glow 3s infinite alternate;
+    letter-spacing:4px;
+
+    animation:pulseGlow 2s infinite alternate;
 }
 
-@keyframes glow{
+@keyframes pulseGlow{
     from{
-        filter:drop-shadow(0 0 5px rgba(255,255,255,.2));
+        text-shadow:
+        0 0 10px #00ffff,
+        0 0 20px #00ffff;
     }
     to{
-        filter:drop-shadow(0 0 15px rgba(255,255,255,.5));
+        text-shadow:
+        0 0 20px #00ffff,
+        0 0 40px #00ffff,
+        0 0 80px #00ffff;
     }
 }
 
@@ -115,16 +123,28 @@ st.markdown("""
 }
 
 .stTabs [data-baseweb="tab"]{
-    background:rgba(255,255,255,.08);
+    background:#0f172a;
+    border:1px solid #00ffff55;
+
     border-radius:12px;
-    padding:10px 18px;
-    color:white;
+
+    color:#00ffff;
+
     transition:.3s;
 }
 
+.stTabs [data-baseweb="tab"]:hover{
+    box-shadow:
+    0 0 15px #00ffff88;
+}
+
 .stTabs [aria-selected="true"]{
-    background:#60a5fa !important;
-    color:white !important;
+    background:#00ffff22 !important;
+
+    color:#00ffff !important;
+
+    box-shadow:
+    0 0 20px #00ffff;
 }
 
 /* ===== GRID ===== */
@@ -137,12 +157,25 @@ st.markdown("""
 
 /* ===== BOOK CARD ===== */
 .book-card{
-    background:rgba(255,255,255,0.12);
-    backdrop-filter:blur(15px);
+    background:
+    linear-gradient(
+        145deg,
+        rgba(0,255,255,.08),
+        rgba(255,255,255,.03)
+    );
 
-    border-radius:22px;
-    padding:20px;
+    border:1px solid #00ffff55;
+
+    backdrop-filter:blur(12px);
+
+    border-radius:20px;
+
     height:170px;
+
+    color:#00ffff;
+
+    font-size:18px;
+    font-weight:700;
 
     display:flex;
     align-items:center;
@@ -150,34 +183,35 @@ st.markdown("""
 
     text-align:center;
 
-    font-size:18px;
-    font-weight:700;
-
-    color:white;
-
-    border:1px solid rgba(255,255,255,.15);
-
-    transition:.3s;
+    transition:.35s;
 }
 
 .book-card:hover{
-    transform:translateY(-8px) scale(1.03);
 
-    background:rgba(96,165,250,.35);
+    transform:
+    translateY(-10px)
+    scale(1.05);
 
     box-shadow:
-    0 10px 25px rgba(0,0,0,.35),
-    0 0 25px rgba(96,165,250,.4);
+    0 0 15px #00ffff,
+    0 0 30px #00ffff,
+    0 0 60px #00ffff55;
+
+    border-color:#00ffff;
 }
 
 /* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"]{
-    background:linear-gradient(
+    background:
+    linear-gradient(
         180deg,
-        #020617,
-        #0f172a,
-        #1e293b
+        #000814,
+        #001d3d,
+        #003566
     );
+
+    border-right:
+    2px solid #00ffff44;
 }
 
 /* Sidebar title */
@@ -192,21 +226,29 @@ section[data-testid="stSidebar"] h3{
     display:flex;
     justify-content:space-between;
 
-    padding:8px 12px;
+    padding:10px 12px;
+
     margin-bottom:8px;
 
-    border-radius:12px;
+    border-radius:10px;
 
-    background:rgba(255,255,255,.08);
+    border:1px solid #00ffff33;
 
-    color:white;
+    background:#00ffff11;
 
-    transition:.25s;
+    color:#00ffff;
+
+    transition:.3s;
 }
 
 .search-card:hover{
-    background:#2563eb;
-    transform:translateX(4px);
+
+    transform:translateX(6px);
+
+    background:#00ffff22;
+
+    box-shadow:
+    0 0 15px #00ffff88;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -283,6 +325,17 @@ if st.sidebar.button("确定添加"):
 # =====================
 # TITLE
 # =====================
+col1,col2,col3 = st.columns(3)
+
+with col1:
+    st.metric("📚 图书总数", total_books)
+
+with col2:
+    st.metric("📂 分类数量", len(categories))
+
+with col3:
+    st.metric("🤖 系统状态", "ONLINE")
+
 st.markdown(
     '<div class="title">📚 图书系统</div>',
     unsafe_allow_html=True
