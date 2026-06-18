@@ -6,27 +6,22 @@ from google.oauth2.service_account import Credentials
 # =====================
 # PAGE CONFIG
 # =====================
-st.set_page_config(
-    page_title="📚 藏书记录",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="📚 藏书记录", layout="wide", initial_sidebar_state="expanded")
 
 # =====================
 # GOOGLE AUTH
 # =====================
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
+    "https://www.googleapis.com/auth/drive",
 ]
 
 service_account_info = dict(st.secrets["gcp_service_account"])
-service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
-
-creds = Credentials.from_service_account_info(
-    service_account_info,
-    scopes=scope
+service_account_info["private_key"] = service_account_info["private_key"].replace(
+    "\\n", "\n"
 )
+
+creds = Credentials.from_service_account_info(service_account_info, scopes=scope)
 
 client = gspread.authorize(creds)
 
@@ -63,12 +58,14 @@ categories = df.columns.tolist()
 def count_books(col):
     return df[col].dropna().shape[0]
 
+
 total_books = sum(count_books(c) for c in categories)
 
 # =====================
 # STYLES
 # =====================
-st.markdown("""
+st.markdown(
+    """
 <style>
 
 /* ===== BACKGROUND ===== */
@@ -139,7 +136,9 @@ st.markdown("""
 }
 
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # =====================
 # SIDEBAR UI
@@ -160,6 +159,7 @@ def search_books(query):
                 results.append((book, cat))
     return results
 
+
 if search:
     st.sidebar.markdown("### 🔎 搜索结果")
 
@@ -169,7 +169,8 @@ if search:
         st.sidebar.info("No matching books")
     else:
         for book, cat in results:
-            st.sidebar.markdown(f"""
+            st.sidebar.markdown(
+                f"""
             <div style="
                 display:flex;
                 justify-content:space-between;
@@ -183,7 +184,9 @@ if search:
                 <div>📖 {book}</div>
                 <div style="color:#9ca3af;">{cat}</div>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
 st.sidebar.markdown("---")
 st.sidebar.metric("📚 总数", total_books)
