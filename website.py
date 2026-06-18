@@ -71,11 +71,19 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
+section[data-testid="stSidebar"]{
+    background: linear-gradient(180deg, #070b18, #0a1024, #0d1430);
+    color: white;
+}
+
 /* =======================
    BACKGROUND IMAGE
 ======================= */
 .stApp{
-    background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
+    background:
+        linear-gradient(180deg, rgba(7,11,24,0.85), rgba(10,16,36,0.85), rgba(13,20,48,0.85)),
+        url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
+
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
