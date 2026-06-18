@@ -71,16 +71,17 @@ total_books = sum(count_books(c) for c in categories)
 st.markdown("""
 <style>
 
-/* ===== PAGE ===== */
+/* ===== LIBRARY BACKGROUND ===== */
 .stApp{
-    background:
-    radial-gradient(circle at top left,#00ffff22,transparent 25%),
-    radial-gradient(circle at bottom right,#8b5cf622,transparent 25%),
-    linear-gradient(135deg,#020617,#050816,#0f172a);
-
-    color:white;
+    background: linear-gradient(
+        135deg,
+        #f8f5f0,
+        #efe8dc,
+        #e8dcc6
+    );
 }
 
+/* ===== PAGE ===== */
 .main .block-container{
     padding:1rem 2.5rem;
 }
@@ -88,66 +89,32 @@ st.markdown("""
 /* ===== TITLE ===== */
 .title{
     text-align:center;
-    font-size:72px;
+    font-size:60px;
     font-weight:900;
 
-    color:#00ffff;
+    color:#5c4033;
 
-    text-shadow:
-    0 0 10px #00ffff,
-    0 0 20px #00ffff,
-    0 0 40px #00ffff;
+    margin-bottom:20px;
 
-    letter-spacing:4px;
-
-    animation:pulseGlow 2s infinite alternate;
-}
-
-@keyframes pulseGlow{
-    from{
-        text-shadow:
-        0 0 10px #00ffff,
-        0 0 20px #00ffff;
-    }
-    to{
-        text-shadow:
-        0 0 20px #00ffff,
-        0 0 40px #00ffff,
-        0 0 80px #00ffff;
-    }
+    font-family: Georgia, serif;
 }
 
 /* ===== TABS ===== */
-.stTabs [data-baseweb="tab-list"]{
-    gap:10px;
-}
-
 .stTabs [data-baseweb="tab"]{
-    background:#0f172a;
-    border:1px solid #00ffff55;
+    background:#f3ece1;
+    border-radius:10px;
 
-    border-radius:12px;
-
-    color:#00ffff;
+    color:#5c4033;
 
     transition:.3s;
 }
 
-.stTabs [data-baseweb="tab"]:hover{
-    box-shadow:
-    0 0 15px #00ffff88;
-}
-
 .stTabs [aria-selected="true"]{
-    background:#00ffff22 !important;
-
-    color:#00ffff !important;
-
-    box-shadow:
-    0 0 20px #00ffff;
+    background:#8b6f47 !important;
+    color:white !important;
 }
 
-/* ===== GRID ===== */
+/* ===== BOOK GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns:repeat(6,1fr);
@@ -157,25 +124,14 @@ st.markdown("""
 
 /* ===== BOOK CARD ===== */
 .book-card{
-    background:
-    linear-gradient(
-        145deg,
-        rgba(0,255,255,.08),
-        rgba(255,255,255,.03)
-    );
 
-    border:1px solid #00ffff55;
+    background:white;
 
-    backdrop-filter:blur(12px);
+    border-left:8px solid #8b6f47;
 
-    border-radius:20px;
+    border-radius:12px;
 
     height:170px;
-
-    color:#00ffff;
-
-    font-size:18px;
-    font-weight:700;
 
     display:flex;
     align-items:center;
@@ -183,21 +139,27 @@ st.markdown("""
 
     text-align:center;
 
-    transition:.35s;
+    padding:15px;
+
+    color:#3d2b1f;
+
+    font-size:18px;
+    font-weight:700;
+
+    box-shadow:
+    0 4px 12px rgba(0,0,0,.08);
+
+    transition:.25s;
 }
 
 .book-card:hover{
 
-    transform:
-    translateY(-10px)
-    scale(1.05);
+    transform:translateY(-5px);
 
     box-shadow:
-    0 0 15px #00ffff,
-    0 0 30px #00ffff,
-    0 0 60px #00ffff55;
+    0 10px 25px rgba(0,0,0,.15);
 
-    border-color:#00ffff;
+    background:#fffdf8;
 }
 
 /* ===== SIDEBAR ===== */
@@ -205,50 +167,189 @@ section[data-testid="stSidebar"]{
     background:
     linear-gradient(
         180deg,
-        #000814,
-        #001d3d,
-        #003566
+        #5c4033,
+        #6f4e37,
+        #8b6f47
     );
-
-    border-right:
-    2px solid #00ffff44;
 }
 
-/* Sidebar title */
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2,
-section[data-testid="stSidebar"] h3{
+/* Sidebar Text */
+section[data-testid="stSidebar"] *{
     color:white;
 }
 
-/* ===== SEARCH RESULT CARD ===== */
+/* ===== SEARCH RESULT ===== */
 .search-card{
+
     display:flex;
     justify-content:space-between;
 
-    padding:10px 12px;
+    padding:10px;
 
     margin-bottom:8px;
 
     border-radius:10px;
 
-    border:1px solid #00ffff33;
+    background:#f5eee3;
 
-    background:#00ffff11;
+    color:#3d2b1f;
 
-    color:#000000;
+    border-left:5px solid #8b6f47;
+
+    transition:.25s;
+}
+
+.search-card:hover{
+    background:#ebe1d1;
+    transform:translateX(4px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:1200px){
+    .book-grid{
+        grid-template-columns:repeat(4,1fr);
+    }
+}
+
+@media (max-width:800px){
+    .book-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+</style><style>
+
+/* ===== LIBRARY BACKGROUND ===== */
+.stApp{
+    background: linear-gradient(
+        135deg,
+        #f8f5f0,
+        #efe8dc,
+        #e8dcc6
+    );
+}
+
+/* ===== PAGE ===== */
+.main .block-container{
+    padding:1rem 2.5rem;
+}
+
+/* ===== TITLE ===== */
+.title{
+    text-align:center;
+    font-size:60px;
+    font-weight:900;
+
+    color:#5c4033;
+
+    margin-bottom:20px;
+
+    font-family: Georgia, serif;
+}
+
+/* ===== TABS ===== */
+.stTabs [data-baseweb="tab"]{
+    background:#f3ece1;
+    border-radius:10px;
+
+    color:#5c4033;
 
     transition:.3s;
 }
 
-.search-card:hover{
+.stTabs [aria-selected="true"]{
+    background:#8b6f47 !important;
+    color:white !important;
+}
 
-    transform:translateX(6px);
+/* ===== BOOK GRID ===== */
+.book-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:24px;
+    margin-top:20px;
+}
 
-    background:#00ffff22;
+/* ===== BOOK CARD ===== */
+.book-card{
+
+    background:white;
+
+    border-left:8px solid #8b6f47;
+
+    border-radius:12px;
+
+    height:170px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    padding:15px;
+
+    color:#3d2b1f;
+
+    font-size:18px;
+    font-weight:700;
 
     box-shadow:
-    0 0 15px #00ffff88;
+    0 4px 12px rgba(0,0,0,.08);
+
+    transition:.25s;
+}
+
+.book-card:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:
+    0 10px 25px rgba(0,0,0,.15);
+
+    background:#fffdf8;
+}
+
+/* ===== SIDEBAR ===== */
+section[data-testid="stSidebar"]{
+    background:
+    linear-gradient(
+        180deg,
+        #5c4033,
+        #6f4e37,
+        #8b6f47
+    );
+}
+
+/* Sidebar Text */
+section[data-testid="stSidebar"] *{
+    color:white;
+}
+
+/* ===== SEARCH RESULT ===== */
+.search-card{
+
+    display:flex;
+    justify-content:space-between;
+
+    padding:10px;
+
+    margin-bottom:8px;
+
+    border-radius:10px;
+
+    background:#f5eee3;
+
+    color:#3d2b1f;
+
+    border-left:5px solid #8b6f47;
+
+    transition:.25s;
+}
+
+.search-card:hover{
+    background:#ebe1d1;
+    transform:translateX(4px);
 }
 
 /* ===== RESPONSIVE ===== */
