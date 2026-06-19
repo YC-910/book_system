@@ -6,6 +6,8 @@ from PIL import Image
 import easyocr
 from PIL import Image
 import numpy as np
+
+reader = easyocr.Reader(['en'], gpu=False)
     
 # =====================
 # PAGE CONFIG
