@@ -11,6 +11,9 @@ import os
 os.environ["EASYOCR_MODULE_PATH"] = "/tmp/easyocr"
 os.environ["TORCH_HOME"] = "/tmp/torch"
 
+# =====================
+# SAFE EASYOCR LOAD
+# =====================
 @st.cache_resource
 def load_reader():
     return easyocr.Reader(['en'], gpu=False, model_storage_directory="/tmp/easyocr")
@@ -126,11 +129,19 @@ total_books = sum(df[c].dropna().shape[0] for c in categories)
 # =====================
 
 def extract_text(image):
-    img = np.array(image)
-    result = reader.readtext(img, detail=0)
-    return " ".join(result)
+    try:
+        image = image.convert("RGB")          # fix phone rotation/format issues
+        image = image.resize((800, 800))      # prevent crash from huge images
 
-def find_book(text):
+        img = np.array(image)
+        result = reader.readtext(img, detail=0)
+
+        return " ".join(result)
+
+    except Exception as e:
+        return ""
+
+def find_book(text, df, categories):
     text = text.lower()
 
     for cat in categories:
@@ -138,7 +149,6 @@ def find_book(text):
 
             book_clean = str(book).lower()
 
-            # flexible matching
             if any(word in book_clean for word in text.split() if len(word) > 3):
                 return book, cat
 
@@ -224,16 +234,30 @@ with scan_tab:
 
     if uploaded:
 
-        image = Image.open(uploaded)
-        st.image(image, caption="扫描图片", use_container_width=True)
+        try:
+            image = Image.open(uploaded)
 
-        text = extract_text(image)
-        st.write("🧠 识别结果:", text)
+            st.image(image, caption="扫描图片", use_container_width=True)
 
-        book, cat = find_book(text)
+            # OCR
+            text = extract_text(image)
 
-        if book:
-            st.success(f"✅ 你已经有这本书：{book}")
-            st.info(f"📂 分类: {cat}")
-        else:
-            st.error("❌ 你没有这本书")
+            st.markdown(
+                "<h2 style='color:white;'>🧠 识别结果</h2>",
+                unsafe_allow_html=True
+            )
+
+            st.write(text if text else "⚠️ 没有识别到文字")
+
+            # match book
+            book, cat = find_book(text, df, categories)
+
+            if book:
+                st.success(f"✅ 你已经有这本书：{book}")
+                st.info(f"📂 分类: {cat}")
+            else:
+                st.error("❌ 你没有这本书")
+
+        except Exception as e:
+            st.error("❌ 图片处理失败")
+            st.code(str(e))
