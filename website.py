@@ -13,7 +13,7 @@ def extract_text(image):
     img = np.array(image)
     result = reader.readtext(img, detail=0)
     return " ".join(result)
-
+    
 # =====================
 # PAGE CONFIG
 # =====================
@@ -126,10 +126,17 @@ def extract_text(image):
     return text.strip()
 
 def find_book(text):
+    text = text.lower()
+
     for cat in categories:
         for book in df[cat].dropna().tolist():
-            if text.lower() in str(book).lower():
+
+            book_clean = str(book).lower()
+
+            # flexible matching
+            if any(word in book_clean for word in text.split() if len(word) > 3):
                 return book, cat
+
     return None, None
 
 # =====================
