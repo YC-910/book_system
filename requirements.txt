@@ -2,5 +2,7 @@ streamlit
 pandas
 gspread
 google-auth
-pytesseract
+easyocr
+opencv-python-headless
+torch
 Pillow
