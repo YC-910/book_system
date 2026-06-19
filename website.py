@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
+from rapidfuzz import fuzz
 
 # =====================
 # PAGE CONFIG
@@ -222,6 +223,44 @@ with add_tab:
     new_book = st.text_input("书名", key="new_book")
     category = st.selectbox("种类", categories, key="add_category")
 
+    # =====================
+    # NORMALIZATION FUNCTION
+    # =====================
+    def normalize(text):
+        return (
+            str(text)
+            .strip()
+            .lower()
+            .replace(" ", "")
+        )
+
+    # =====================
+    # SMART DUPLICATE CHECK
+    # =====================
+    def find_duplicate(book_name, df, threshold=85):
+
+        new_name = normalize(book_name)
+
+        for cat in categories:
+            for book in df[cat].dropna().tolist():
+
+                existing = normalize(book)
+
+                # 1. exact match
+                if new_name == existing:
+                    return book, cat, 100
+
+                # 2. fuzzy match
+                score = fuzz.ratio(new_name, existing)
+
+                if score >= threshold:
+                    return book, cat, score
+
+        return None, None, 0
+
+    # =====================
+    # ADD BUTTON
+    # =====================
     if st.button("确定添加", use_container_width=True):
 
         if not new_book.strip():
@@ -229,31 +268,18 @@ with add_tab:
 
         else:
 
-            # ==============================
-            # CHECK DUPLICATE ACROSS SHEETS
-            # ==============================
-            found = None
+            # 🔍 SMART DUPLICATE CHECK
+            found_book, found_cat, score = find_duplicate(new_book, df)
 
-            for cat in categories:
-                books = df[cat].dropna().tolist()
+            if found_book:
 
-                for book in books:
-                    if new_book.strip().lower() == str(book).strip().lower():
-                        found = cat
-                        break
+                st.error(
+                    f"❌ 检测到重复书籍\n\n"
+                    f"📖 已存在: {found_book}\n"
+                    f"📂 类别: {found_cat}\n"
+                    f"📊 相似度: {score:.1f}%"
+                )
 
-                if found:
-                    break
-
-            # ==============================
-            # IF EXISTS → BLOCK
-            # ==============================
-            if found:
-                st.error(f"❌ 你已经在「{found}」类别中添加过这本书：《{new_book}》")
-
-            # ==============================
-            # IF NOT EXISTS → SAVE
-            # ==============================
             else:
 
                 headers = sheet.row_values(1)
