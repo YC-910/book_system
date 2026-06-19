@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # =====================
-# UI STYLE
+# UI STYLE (UNCHANGED)
 # =====================
 st.markdown("""
 <style>
@@ -90,7 +90,7 @@ div[data-testid="stStatusWidget"] { display: none; }
 """, unsafe_allow_html=True)
 
 # =====================
-# GOOGLE AUTH
+# AUTH
 # =====================
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -117,6 +117,7 @@ sheet = client.open_by_key(
 @st.cache_data(ttl=60)
 def load_data():
     data = sheet.get_all_values()
+
     if not data:
         return pd.DataFrame()
 
@@ -124,13 +125,15 @@ def load_data():
     df.columns = df.iloc[0]
     df = df[1:]
     df = df.replace(r"^\s*$", pd.NA, regex=True)
+
     return df
+
 
 df = load_data()
 categories = df.columns.tolist()
 
 # =====================
-# NORMALIZE
+# NORMALIZATION
 # =====================
 def normalize(text):
     return str(text).strip().lower().replace(" ", "")
@@ -144,6 +147,7 @@ inverted_index = defaultdict(set)
 for cat in categories:
     for book in df[cat].dropna().tolist():
         key = normalize(book)
+
         book_index[key] = (book, cat)
 
         for ch in key:
@@ -167,6 +171,7 @@ def find_duplicate(book_name, threshold=85):
         return (*book_index[key], 100)
 
     candidates = set()
+
     for ch in key:
         candidates.update(inverted_index.get(ch, set()))
 
@@ -190,7 +195,7 @@ library_tab, search_tab, add_tab = st.tabs(
 )
 
 # =====================
-# LIBRARY
+# LIBRARY TAB
 # =====================
 with library_tab:
     category_tabs = st.tabs(categories)
@@ -214,7 +219,7 @@ with library_tab:
             st.markdown(html, unsafe_allow_html=True)
 
 # =====================
-# SEARCH
+# SEARCH TAB
 # =====================
 with search_tab:
     st.subheader("🔍 搜索书本")
@@ -225,6 +230,7 @@ with search_tab:
         key = normalize(keyword)
 
         results = set()
+
         for ch in key:
             results.update(inverted_index.get(ch, set()))
 
@@ -257,7 +263,7 @@ with search_tab:
             """, unsafe_allow_html=True)
 
 # =====================
-# ADD
+# ADD TAB
 # =====================
 with add_tab:
 
