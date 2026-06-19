@@ -15,67 +15,6 @@ st.set_page_config(
 )
 
 # =====================
-# SEARCH ENGINE
-# =====================
-
-def search_engine_v2(keyword):
-    key = normalize(keyword)
-
-    results = {}
-
-    # =====================
-    # FAST CANDIDATE GATHERING
-    # =====================
-    candidates = set()
-
-    for ch in key:
-        candidates.update(inverted_index.get(ch, set()))
-
-    # fallback if too strict
-    if not candidates:
-        for cat in categories:
-            for book in df[cat].dropna().tolist():
-                candidates.add((book, cat))
-
-    # =====================
-    # SCORING ENGINE
-    # =====================
-    for book, cat in candidates:
-
-        norm_book = normalize(book)
-        score = 0
-
-        # EXACT MATCH
-        if key == norm_book:
-            score = 1000
-
-        # PREFIX MATCH
-        elif norm_book.startswith(key):
-            score += 800
-
-        # SUBSTRING MATCH
-        elif key in norm_book:
-            score += 500
-
-        # FUZZY MATCH (main intelligence layer)
-        score += fuzz.ratio(key, norm_book)
-
-        # CHARACTER OVERLAP BOOST
-        overlap = sum(1 for ch in key if ch in norm_book)
-        score += overlap * 8
-
-        # store best score only
-        if book not in results or score > results[book][0]:
-            results[book] = (score, book, cat)
-
-    # =====================
-    # SORT RESULTS
-    # =====================
-    ranked = sorted(results.values(), key=lambda x: x[0], reverse=True)
-
-    return ranked
-
-# =====================
 # UI STYLE (UNCHANGED)
 # =====================
 st.markdown("""
@@ -226,18 +165,25 @@ st.metric("📚 图书总数", total_books)
 # DUPLICATE CHECK
 # =====================
 def find_duplicate(book_name, threshold=85):
-    results = search_engine_v2(book_name)
+    key = normalize(book_name)
 
-    if not results:
-        return None, None, 0
+    if key in book_index:
+        return (*book_index[key], 100)
 
-    best_score, book, cat = results[0]
+    candidates = set()
 
-    if best_score >= 900:  # near-exact duplicate
-        return book, cat, best_score / 10
+    for ch in key:
+        candidates.update(inverted_index.get(ch, set()))
+
+    best, best_score = None, 0
+
+    for book, cat in candidates:
+        score = fuzz.ratio(key, normalize(book))
+        if score > best_score:
+            best, best_score = (book, cat), score
 
     if best_score >= threshold:
-        return book, cat, best_score
+        return best[0], best[1], best_score
 
     return None, None, 0
 
@@ -281,15 +227,27 @@ with search_tab:
     keyword = st.text_input("输入书名", placeholder="例如：法医")
 
     if keyword:
+        key = normalize(keyword)
 
-        results = search_engine_v2(keyword)
+        results = set()
+
+        for ch in key:
+            results.update(inverted_index.get(ch, set()))
+
+        if not results:
+            results = [
+                (book, cat)
+                for cat in categories
+                for book in df[cat].dropna().tolist()
+                if key in normalize(book)
+            ]
 
         st.write(f"找到 {len(results)} 本书")
 
         if not results:
             st.warning("没有找到相关书籍")
 
-        for score, book, cat in results[:20]:
+        for book, cat in results:
             st.markdown(f"""
             <div style="
                 background:rgba(255,255,255,0.88);
@@ -300,11 +258,10 @@ with search_tab:
                 font-weight:600;
             ">
                 📖 {book}<br>
-                <small>📂 {cat}</small><br>
-                <small>🔥 score: {score:.1f}</small>
+                <small>📂 {cat}</small>
             </div>
             """, unsafe_allow_html=True)
-            
+
 # =====================
 # ADD TAB
 # =====================
