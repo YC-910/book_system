@@ -3,7 +3,9 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from PIL import Image
-import pytesseract
+import easyocr
+from PIL import Image
+import numpy as np
 
 # =====================
 # PAGE CONFIG
