@@ -197,16 +197,31 @@ with search_tab:
     keyword = st.text_input("输入书名", placeholder="例如：法医")
 
     if keyword:
-        search_history[keyword] += 1
+        key = normalize(keyword)
 
-        results = search_books(keyword)
+        results = []
+
+        for book, cat in all_books:
+            score = fuzz.partial_ratio(key, normalize(book))
+
+            # boost exact/substring match
+            if key in normalize(book):
+                score += 30
+
+            results.append((score, book, cat))
+
+        # sort by relevance
+        results.sort(reverse=True, key=lambda x: x[0])
+
+        # keep top results only (clean UX)
+        results = results[:30]
 
         st.write(f"找到 {len(results)} 本书")
 
         if not results:
             st.warning("没有找到相关书籍")
 
-        for score, book, cat in results:
+        for _, book, cat in results:
             st.markdown(f"""
             <div style="
                 background:rgba(255,255,255,0.88);
@@ -214,13 +229,13 @@ with search_tab:
                 border-radius:12px;
                 margin-bottom:10px;
                 color:black;
+                font-weight:600;
             ">
-                📖 {book} <br>
-                📊 Score: {score:.1f} <br>
-                📂 {cat}
+                📖 {book}<br>
+                <small>📂 {cat}</small>
             </div>
             """, unsafe_allow_html=True)
-
+            
 # =====================
 # ADD
 # =====================
