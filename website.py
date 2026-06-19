@@ -6,13 +6,6 @@ from PIL import Image
 import easyocr
 from PIL import Image
 import numpy as np
-
-reader = easyocr.Reader(['en'], gpu=False)
-
-def extract_text(image):
-    img = np.array(image)
-    result = reader.readtext(img, detail=0)
-    return " ".join(result)
     
 # =====================
 # PAGE CONFIG
@@ -121,9 +114,11 @@ total_books = sum(df[c].dropna().shape[0] for c in categories)
 # =====================
 # AI OCR FUNCTION
 # =====================
+
 def extract_text(image):
-    text = pytesseract.image_to_string(image)
-    return text.strip()
+    img = np.array(image)
+    result = reader.readtext(img, detail=0)
+    return " ".join(result)
 
 def find_book(text):
     text = text.lower()
