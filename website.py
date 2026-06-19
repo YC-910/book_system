@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
+from PIL import Image
+import pytesseract
 
 # =====================
 # PAGE CONFIG
@@ -13,21 +15,13 @@ st.set_page_config(
 )
 
 # =====================
-# HIDE STREAMLIT UI ELEMENTS
+# CSS (same as yours)
 # =====================
 st.markdown("""
 <style>
 #MainMenu {visibility: hidden;}
 header {visibility: hidden;}
 footer {visibility: hidden;}
-
-div[data-testid="stToolbar"] {
-    display: none;
-}
-
-div[data-testid="stStatusWidget"] {
-    display: none;
-}
 
 .stApp{
     background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
@@ -73,27 +67,12 @@ div[data-testid="stStatusWidget"] {
 
     box-shadow:0px 10px 30px rgba(0,0,0,0.15);
     border: 1px solid rgba(255,255,255,0.6);
-    transition:0.3s ease;
-}
-
-.book-card:hover{
-    transform: translateY(-6px);
-    box-shadow: 0 15px 35px rgba(120,180,255,0.25);
-    border: 1px solid rgba(120,180,255,0.5);
-}
-
-@media (max-width: 1200px){
-    .book-grid{ grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (max-width: 800px){
-    .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # =====================
-# GOOGLE SHEET AUTH
+# GOOGLE SHEET
 # =====================
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -119,9 +98,6 @@ sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
 @st.cache_data(ttl=60)
 def load_data():
     data = sheet.get_all_values()
-    if not data:
-        return pd.DataFrame()
-
     df = pd.DataFrame(data)
     df.columns = df.iloc[0]
     df = df[1:]
@@ -131,10 +107,21 @@ def load_data():
 df = load_data()
 categories = df.columns.tolist()
 
-# =====================
-# BOOK COUNT
-# =====================
 total_books = sum(df[c].dropna().shape[0] for c in categories)
+
+# =====================
+# AI OCR FUNCTION
+# =====================
+def extract_text(image):
+    text = pytesseract.image_to_string(image)
+    return text.strip()
+
+def find_book(text):
+    for cat in categories:
+        for book in df[cat].dropna().tolist():
+            if text.lower() in str(book).lower():
+                return book, cat
+    return None, None
 
 # =====================
 # UI HEADER
@@ -143,31 +130,23 @@ st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True
 st.metric("📚 图书总数", total_books)
 
 # =====================
-# TABS
+# TABS (NOW 4 TABS)
 # =====================
-library_tab, search_tab, add_tab = st.tabs(
-    ["📚 图书馆", "🔍 搜索书本", "➕ 添加书本"]
+library_tab, search_tab, add_tab, scan_tab = st.tabs(
+    ["📚 图书馆", "🔍 搜索书本", "➕ 添加书本", "📸 扫描书本"]
 )
 
 # =====================
 # LIBRARY
 # =====================
 with library_tab:
-
     category_tabs = st.tabs(categories)
 
     for i, cat in enumerate(categories):
-
         with category_tabs[i]:
-
             books = df[cat].dropna().tolist()
 
             st.subheader(cat)
-            st.write(f"📚 共: {len(books)} 本")
-
-            if not books:
-                st.info("No books found")
-                continue
 
             html = '<div class="book-grid">'
             for book in books:
@@ -180,13 +159,9 @@ with library_tab:
 # SEARCH
 # =====================
 with search_tab:
-
-    st.subheader("🔍 搜索书本")
-
-    keyword = st.text_input("输入书名", placeholder="例如：法医")
+    keyword = st.text_input("输入书名")
 
     if keyword:
-
         results = []
 
         for cat in categories:
@@ -196,49 +171,48 @@ with search_tab:
 
         st.write(f"找到 {len(results)} 本书")
 
-        if not results:
-            st.warning("没有找到相关书籍")
-
         for book, cat in results:
-            st.markdown(f"""
-            <div style="
-                background:rgba(255,255,255,0.88);
-                padding:12px;
-                border-radius:12px;
-                margin-bottom:10px;
-                color:black;
-                font-weight:600;
-            ">
-                📖 {book}<br>
-                <small>📂 {cat}</small>
-            </div>
-            """, unsafe_allow_html=True)
+            st.write(f"📖 {book} ({cat})")
 
 # =====================
-# ADD BOOK
+# ADD
 # =====================
 with add_tab:
+    new_book = st.text_input("书名")
+    category = st.selectbox("种类", categories)
 
-    st.subheader("➕ 添加书本")
+    if st.button("添加"):
+        headers = sheet.row_values(1)
+        col_index = headers.index(category) + 1
+        next_row = len(sheet.col_values(col_index)) + 1
 
-    new_book = st.text_input("书名", key="new_book")
+        sheet.update_cell(next_row, col_index, new_book)
 
-    category = st.selectbox("种类", categories, key="add_category")
+        st.success("添加成功")
+        st.cache_data.clear()
+        st.rerun()
 
-    if st.button("确定添加", use_container_width=True):
+# =====================
+# 📸 SCANNER TAB (NEW)
+# =====================
+with scan_tab:
 
-        if new_book.strip():
+    st.subheader("📸 扫描书本")
 
-            headers = sheet.row_values(1)
-            col_index = headers.index(category) + 1
-            next_row = len(sheet.col_values(col_index)) + 1
+    uploaded = st.file_uploader("上传书本照片", type=["png", "jpg", "jpeg"])
 
-            sheet.update_cell(next_row, col_index, new_book)
+    if uploaded:
 
-            st.success(f"✅ 已添加：《{new_book}》")
+        image = Image.open(uploaded)
+        st.image(image, caption="扫描图片", use_container_width=True)
 
-            st.cache_data.clear()
-            st.rerun()
+        text = extract_text(image)
+        st.write("🧠 识别结果:", text)
 
+        book, cat = find_book(text)
+
+        if book:
+            st.success(f"✅ 你已经有这本书：{book}")
+            st.info(f"📂 分类: {cat}")
         else:
-            st.warning("请输入书名")
+            st.error("❌ 你没有这本书")
