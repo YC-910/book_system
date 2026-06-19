@@ -176,7 +176,7 @@ with library_tab:
             st.markdown(html, unsafe_allow_html=True)
 
 # =====================
-# SEARCH TAB
+# SEARCH TAB (SMART)
 # =====================
 with search_tab:
 
@@ -186,32 +186,49 @@ with search_tab:
 
     if keyword:
 
-        results = [
-            (book, cat)
-            for cat in categories
-            for book in df[cat].dropna().tolist()
-            if keyword.lower() in str(book).lower()
-        ]
+        results = []
+        keyword_clean = keyword.strip().lower()
+
+        # search all categories
+        for cat in categories:
+            for book in df[cat].dropna().tolist():
+
+                book_clean = str(book).strip().lower()
+
+                if keyword_clean in book_clean:
+                    results.append((book, cat))
 
         st.write(f"找到 {len(results)} 本书")
 
         if not results:
             st.warning("没有找到相关书籍")
 
-        for book, cat in results:
-            st.markdown(f"""
-            <div style="
-                background:rgba(255,255,255,0.88);
-                padding:12px;
-                border-radius:12px;
-                margin-bottom:10px;
-                color:black;
-                font-weight:600;
-            ">
-                📖 {book}<br>
-                <small>📂 {cat}</small>
-            </div>
-            """, unsafe_allow_html=True)
+        else:
+
+            # =========================
+            # SMART DISPLAY (WITH INFO)
+            # =========================
+            for book, cat in results:
+
+                # exact match check (duplicate-style detection)
+                is_exact = keyword_clean == str(book).strip().lower()
+
+                st.markdown(f"""
+                <div style="
+                    background:rgba(255,255,255,0.88);
+                    padding:12px;
+                    border-radius:12px;
+                    margin-bottom:10px;
+                    color:black;
+                    font-weight:600;
+                    border: {'2px solid #22c55e' if is_exact else 'none'};
+                ">
+                    📖 {book}
+                    <br>
+                    <small>📂 {cat}</small>
+                    {'<br><b style="color:green">✔ 已完整匹配 / 已存在</b>' if is_exact else ''}
+                </div>
+                """, unsafe_allow_html=True)
 
 # =====================
 # ADD TAB
