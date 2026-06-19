@@ -66,6 +66,16 @@ st.markdown(
     """
 <style>
 
+    /* Hide Streamlit top-right menu */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+
+    /* Remove toolbar buttons (edit, GitHub, star, etc.) */
+    div[data-testid="stToolbar"] {
+        display: none;
+    }
+
 /* ===== BACKGROUND ===== */
 .stApp{
     background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
