@@ -126,7 +126,6 @@ def load_data():
 
     return df
 
-
 df = load_data()
 categories = df.columns.tolist()
 
