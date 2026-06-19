@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # =====================
-# UI STYLE (UNCHANGED)
+# HIDE UI
 # =====================
 st.markdown("""
 <style>
@@ -33,64 +33,11 @@ div[data-testid="stStatusWidget"] { display: none; }
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
-
-.main .block-container{
-    padding: 1rem 2.5rem;
-}
-
-.title{
-    text-align:center;
-    font-size:56px;
-    font-weight:900;
-    margin-bottom:20px;
-    color:#ffffff;
-}
-
-.book-grid{
-    display:grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 26px;
-    margin-top: 14px;
-}
-
-.book-card{
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(10px);
-    border-radius:18px;
-    padding:20px;
-    height:150px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:18px;
-    font-weight:800;
-    color:#111827;
-
-    box-shadow:0px 10px 30px rgba(0,0,0,0.15);
-    border: 1px solid rgba(255,255,255,0.6);
-    transition:0.3s ease;
-}
-
-.book-card:hover{
-    transform: translateY(-6px);
-    box-shadow: 0 15px 35px rgba(120,180,255,0.25);
-    border: 1px solid rgba(120,180,255,0.5);
-}
-
-@media (max-width: 1200px){
-    .book-grid{ grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (max-width: 800px){
-    .book-grid{ grid-template-columns: repeat(2, 1fr); }
-}
 </style>
 """, unsafe_allow_html=True)
 
 # =====================
-# GOOGLE AUTH
+# GOOGLE SHEET AUTH
 # =====================
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -100,15 +47,12 @@ SCOPE = [
 service_account_info = dict(st.secrets["gcp_service_account"])
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 
-creds = Credentials.from_service_account_info(
-    service_account_info,
-    scopes=SCOPE
-)
-
+creds = Credentials.from_service_account_info(service_account_info, scopes=SCOPE)
 client = gspread.authorize(creds)
 
-SHEET_ID = "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
-sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
+sheet = client.open_by_key(
+    "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
+).worksheet("纸质书")
 
 # =====================
 # LOAD DATA
@@ -125,48 +69,51 @@ def load_data():
     df = df.replace(r"^\s*$", pd.NA, regex=True)
     return df
 
-
 df = load_data()
 categories = df.columns.tolist()
 
 # =====================
-# INDEX BUILD
+# PRECOMPUTE FLAT BOOK LIST (BIG SPEED BOOST)
+# =====================
+all_books = []
+for cat in categories:
+    for b in df[cat].dropna().tolist():
+        all_books.append((b, cat))
+
+# =====================
+# NORMALIZATION
 # =====================
 def normalize(text):
     return str(text).strip().lower().replace(" ", "")
 
+# =====================
+# INDEX BUILD (FASTER SEARCH + DUPLICATE CHECK)
+# =====================
 book_index = {}
 inverted_index = defaultdict(set)
 
-for cat in categories:
-    for book in df[cat].dropna().tolist():
-        key = normalize(book)
+for book, cat in all_books:
+    key = normalize(book)
 
-        book_index[key] = (book, cat)
+    book_index[key] = (book, cat)
 
-        for ch in key:
-            inverted_index[ch].add((book, cat))
-
-# =====================
-# COUNT
-# =====================
-total_books = sum(df[c].dropna().shape[0] for c in categories)
-
-st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
-st.metric("📚 图书总数", total_books)
+    for ch in key:
+        inverted_index[ch].add((book, cat))
 
 # =====================
-# DUPLICATE CHECK
+# DUPLICATE CHECK (OPTIMIZED)
 # =====================
 def find_duplicate(book_name, threshold=85):
     key = normalize(book_name)
 
+    # O(1)
     if key in book_index:
-        return book_index[key][0], book_index[key][1], 100
+        return (*book_index[key], 100)
 
+    # candidate set
     candidates = set()
     for ch in key:
-        candidates.update(inverted_index.get(ch, set()))
+        candidates |= inverted_index.get(ch, set())
 
     best, best_score = None, 0
 
@@ -176,9 +123,30 @@ def find_duplicate(book_name, threshold=85):
             best, best_score = (book, cat), score
 
     if best_score >= threshold:
-        return best[0], best[1], best_score
+        return (*best, best_score)
 
     return None, None, 0
+
+# =====================
+# SEARCH ENGINE (OPTIMIZED)
+# =====================
+def search_books(keyword):
+    key = normalize(keyword)
+
+    results = set()
+    for ch in key:
+        results |= inverted_index.get(ch, set())
+
+    if not results:
+        results = [(b, c) for b, c in all_books if key in normalize(b)]
+
+    return results
+
+# =====================
+# UI HEADER
+# =====================
+st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
+st.metric("📚 图书总数", len(all_books))
 
 # =====================
 # TABS
@@ -220,19 +188,7 @@ with search_tab:
     keyword = st.text_input("输入书名", placeholder="例如：法医")
 
     if keyword:
-        key = normalize(keyword)
-
-        results = set()
-        for ch in key:
-            results.update(inverted_index.get(ch, set()))
-
-        if not results:
-            results = [
-                (book, cat)
-                for cat in categories
-                for book in df[cat].dropna().tolist()
-                if key in normalize(book)
-            ]
+        results = search_books(keyword)
 
         st.write(f"找到 {len(results)} 本书")
 
@@ -255,10 +211,9 @@ with search_tab:
             """, unsafe_allow_html=True)
 
 # =====================
-# ADD
+# ADD BOOK (2 COLUMNS UI)
 # =====================
 with add_tab:
-
     st.subheader("➕ 添加书本")
 
     col1, col2 = st.columns(2)
