@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # =====================
-# UI STYLE (UNCHANGED)
+# UI STYLE
 # =====================
 st.markdown("""
 <style>
