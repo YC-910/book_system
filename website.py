@@ -66,13 +66,23 @@ st.markdown(
     """
 <style>
 
-    /* Hide Streamlit top-right menu */
+    /* Hide top-right menu */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* Remove toolbar buttons (edit, GitHub, star, etc.) */
+    /* Hide toolbar (edit/share/github) */
     div[data-testid="stToolbar"] {
+        display: none;
+    }
+
+    /* Try to reduce bottom-right floating menu */
+    div[data-testid="stStatusWidget"] {
+        display: none;
+    }
+
+    /* Hide deploy / manage button area (best effort only) */
+    #stNotificationFrame {
         display: none;
     }
 
