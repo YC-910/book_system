@@ -6,6 +6,7 @@ from PIL import Image
 import easyocr
 from PIL import Image
 import numpy as np
+import os
 
 os.environ["EASYOCR_MODULE_PATH"] = "/tmp/easyocr"
 os.environ["TORCH_HOME"] = "/tmp/torch"
