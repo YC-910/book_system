@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # =====================
-# HIDE STREAMLIT UI ELEMENTS
+# UI STYLE (UNCHANGED)
 # =====================
 st.markdown("""
 <style>
@@ -90,7 +90,7 @@ div[data-testid="stStatusWidget"] { display: none; }
 """, unsafe_allow_html=True)
 
 # =====================
-# GOOGLE SHEET AUTH
+# GOOGLE AUTH
 # =====================
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -116,7 +116,6 @@ sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
 @st.cache_data(ttl=60)
 def load_data():
     data = sheet.get_all_values()
-
     if not data:
         return pd.DataFrame()
 
@@ -124,7 +123,6 @@ def load_data():
     df.columns = df.iloc[0]
     df = df[1:]
     df = df.replace(r"^\s*$", pd.NA, regex=True)
-
     return df
 
 
@@ -132,61 +130,50 @@ df = load_data()
 categories = df.columns.tolist()
 
 # =====================
-# 🚀 BUILD GOOGLE-LEVEL INDEX
+# INDEX BUILD
 # =====================
 def normalize(text):
     return str(text).strip().lower().replace(" ", "")
 
-book_index = {}                  # O(1) exact search
-inverted_index = defaultdict(set)  # fast keyword search
+book_index = {}
+inverted_index = defaultdict(set)
 
 for cat in categories:
     for book in df[cat].dropna().tolist():
-
         key = normalize(book)
 
         book_index[key] = (book, cat)
 
-        # keyword index (Chinese-friendly: char-based)
         for ch in key:
             inverted_index[ch].add((book, cat))
 
 # =====================
-# BOOK COUNT
+# COUNT
 # =====================
 total_books = sum(df[c].dropna().shape[0] for c in categories)
 
-# =====================
-# UI HEADER
-# =====================
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
 st.metric("📚 图书总数", total_books)
 
 # =====================
-# 🚀 FAST DUPLICATE CHECK (O(1) + small fallback)
+# DUPLICATE CHECK
 # =====================
 def find_duplicate(book_name, threshold=85):
-
     key = normalize(book_name)
 
-    # 1. O(1) exact match
     if key in book_index:
         return book_index[key][0], book_index[key][1], 100
 
-    # 2. candidate search (fast)
     candidates = set()
     for ch in key:
         candidates.update(inverted_index.get(ch, set()))
 
-    # 3. fuzzy only on small subset
-    best = None
-    best_score = 0
+    best, best_score = None, 0
 
     for book, cat in candidates:
         score = fuzz.ratio(key, normalize(book))
         if score > best_score:
-            best = (book, cat)
-            best_score = score
+            best, best_score = (book, cat), score
 
     if best_score >= threshold:
         return best[0], best[1], best_score
@@ -201,16 +188,13 @@ library_tab, search_tab, add_tab = st.tabs(
 )
 
 # =====================
-# LIBRARY TAB (UNCHANGED UI)
+# LIBRARY
 # =====================
 with library_tab:
-
     category_tabs = st.tabs(categories)
 
     for i, cat in enumerate(categories):
-
         with category_tabs[i]:
-
             books = df[cat].dropna().tolist()
 
             st.subheader(cat)
@@ -228,24 +212,20 @@ with library_tab:
             st.markdown(html, unsafe_allow_html=True)
 
 # =====================
-# SEARCH TAB (UPGRADED ENGINE)
+# SEARCH
 # =====================
 with search_tab:
-
     st.subheader("🔍 搜索书本")
 
     keyword = st.text_input("输入书名", placeholder="例如：法医")
 
     if keyword:
-
         key = normalize(keyword)
 
-        # FAST SEARCH via index
         results = set()
         for ch in key:
             results.update(inverted_index.get(ch, set()))
 
-        # fallback: substring scan
         if not results:
             results = [
                 (book, cat)
@@ -275,7 +255,7 @@ with search_tab:
             """, unsafe_allow_html=True)
 
 # =====================
-# ADD TAB
+# ADD
 # =====================
 with add_tab:
 
@@ -295,8 +275,7 @@ with add_tab:
             st.warning("请输入书名")
 
         else:
-
-            found_book, found_cat, score = find_duplicate(new_book, df)
+            found_book, found_cat, score = find_duplicate(new_book)
 
             if found_book:
                 st.error(
@@ -305,7 +284,6 @@ with add_tab:
                     f"📂 类别: {found_cat}\n"
                     f"📊 相似度: {score:.1f}%"
                 )
-
             else:
                 headers = sheet.row_values(1)
                 col_index = headers.index(category) + 1
