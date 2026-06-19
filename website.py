@@ -87,30 +87,6 @@ div[data-testid="stStatusWidget"] { display: none; }
     .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 
-/* =====================
-   BIG METRIC TEXT
-===================== */
-div[data-testid="stMetricValue"] {
-    font-size: 42px !important;
-    font-weight: 900 !important;
-    color: #ffffff !important;
-}
-
-div[data-testid="stMetricLabel"] {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    color: rgba(255,255,255,0.85) !important;
-}
-
-/* =====================
-   BIG CATEGORY COUNT TEXT
-===================== */
-div[data-testid="stMarkdownContainer"] p {
-    font-size: 22px !important;
-    font-weight: 700 !important;
-    color: #ffffff;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
