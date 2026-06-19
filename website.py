@@ -7,8 +7,15 @@ import easyocr
 from PIL import Image
 import numpy as np
 
-reader = easyocr.Reader(['en'], gpu=False)
-    
+os.environ["EASYOCR_MODULE_PATH"] = "/tmp/easyocr"
+os.environ["TORCH_HOME"] = "/tmp/torch"
+
+@st.cache_resource
+def load_reader():
+    return easyocr.Reader(['en'], gpu=False, model_storage_directory="/tmp/easyocr")
+
+reader = load_reader()
+
 # =====================
 # PAGE CONFIG
 # =====================
