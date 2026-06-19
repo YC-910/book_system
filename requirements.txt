@@ -2,8 +2,4 @@ streamlit
 pandas
 gspread
 google-auth
-easyocr
-opencv-python-headless
-torch
-Pillow
 rapidfuzz
