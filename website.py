@@ -200,7 +200,7 @@ with search_tab:
 
     search = st.text_input(
         "输入书名",
-        placeholder="例如：哈利波特"
+        placeholder="法医"
     )
 
     if search:
