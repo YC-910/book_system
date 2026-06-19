@@ -139,106 +139,113 @@ st.markdown(
 )
 
 # =====================
-# SIDEBAR UI
-# =====================
-st.sidebar.title("📚 侧边栏")
-
-search = st.sidebar.text_input("🔍 寻找书本")
-
-# =====================
-# SEARCH FUNCTION
-# =====================
-def search_books(query):
-    results = []
-    for cat in categories:
-        books = df[cat].dropna().tolist()
-        for book in books:
-            if query.lower() in str(book).lower():
-                results.append((book, cat))
-    return results
-
-if search:
-    st.sidebar.markdown("### 🔎 搜索结果")
-
-    results = search_books(search)
-
-    if not results:
-        st.sidebar.info("No matching books")
-    else:
-        for book, cat in results:
-            st.sidebar.markdown(
-                f"""
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                padding:6px 10px;
-                margin:4px 0;
-                border-radius:8px;
-                background:#1f2937;
-                color:white;
-                font-size:13px;
-            ">
-                <div>📖 {book}</div>
-                <div style="color:#9ca3af;">{cat}</div>
-            </div>
-            """,
-                unsafe_allow_html=True,
-            )
-
-st.sidebar.markdown("---")
-st.sidebar.metric("📚 总数", total_books)
-st.sidebar.markdown("---")
-
-# =====================
-# ADD BOOK
-# =====================
-st.sidebar.subheader("➕ 添加书本")
-
-new_book = st.sidebar.text_input("书名")
-category = st.sidebar.selectbox("种类", categories)
-
-if st.sidebar.button("确定添加") and new_book.strip():
-
-    headers = sheet.row_values(1)
-    col_index = headers.index(category) + 1
-    next_row = len(sheet.col_values(col_index)) + 1
-
-    sheet.update_cell(next_row, col_index, new_book)
-
-    st.cache_data.clear()
-    st.rerun()
-
-# =====================
 # MAIN TITLE
 # =====================
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
 
+st.metric("📚 图书总数", total_books)
+
+main_tab, search_tab, add_tab = st.tabs([
+    "📚 图书馆",
+    "🔍 搜索书本",
+    "➕ 添加书本"
+])
+
 # =====================
 # CATEGORY TABS
 # =====================
-tabs = st.tabs(categories)
+with main_tab:
 
-for i, cat in enumerate(categories):
+    category_tabs = st.tabs(categories)
 
-    with tabs[i]:
+    for i, cat in enumerate(categories):
 
-        books = df[cat].dropna().tolist()
+        with category_tabs[i]:
 
-        if search:
-            books = [b for b in books if search.lower() in str(b).lower()]
+            books = df[cat].dropna().tolist()
+    
+            if search:
+                books = [b for b in books if search.lower() in str(b).lower()]
+    
+            st.subheader(f"📂 {cat}")
+            st.markdown(f"### 📚 共: {len(books)} 本")
+    
+            if not books:
+                st.info("No books found")
+                continue
+    
+            html = '<div class="book-grid">'
+    
+            for book in books:
+                html += f'<div class="book-card">📖 {book}</div>'
+    
+            html += "</div>"
+    
+            st.markdown(html, unsafe_allow_html=True)
 
-        st.subheader(f"📂 {cat}")
-        st.markdown(f"### 📚 共: {len(books)} 本")
+with search_tab:
 
-        if not books:
-            st.info("No books found")
-            continue
+    search = st.text_input("🔍 输入书名搜索")
 
-        html = '<div class="book-grid">'
+    if search:
 
-        for book in books:
-            html += f'<div class="book-card">📖 {book}</div>'
+        results = []
 
-        html += "</div>"
+        for cat in categories:
+            books = df[cat].dropna().tolist()
 
-        st.markdown(html, unsafe_allow_html=True)
+            for book in books:
+                if search.lower() in str(book).lower():
+                    results.append((book, cat))
+
+        st.subheader(f"找到 {len(results)} 本书")
+
+        if not results:
+            st.warning("没有找到相关书籍")
+        else:
+            for book, cat in results:
+                st.markdown(
+                    f"""
+                    <div class="book-card">
+                        📖 {book}<br>
+                        <small>{cat}</small>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+with add_tab:
+
+    st.subheader("➕ 添加书本")
+
+    new_book = st.text_input("书名")
+
+    category = st.selectbox(
+        "种类",
+        categories,
+        key="add_category"
+    )
+
+    if st.button("确定添加"):
+
+        if new_book.strip():
+
+            headers = sheet.row_values(1)
+
+            col_index = headers.index(category) + 1
+
+            next_row = len(sheet.col_values(col_index)) + 1
+
+            sheet.update_cell(
+                next_row,
+                col_index,
+                new_book
+            )
+
+            st.success("添加成功！")
+
+            st.cache_data.clear()
+
+            st.rerun()
+
+
