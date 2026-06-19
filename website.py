@@ -142,6 +142,33 @@ st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True
 st.metric("📚 图书总数", total_books)
 
 # =====================
+# NORMALIZATION
+# =====================
+def normalize(text):
+    return str(text).strip().lower().replace(" ", "")
+
+# =====================
+# SMART DUPLICATE CHECK
+# =====================
+def find_duplicate(book_name, df, threshold=85):
+
+    new_name = normalize(book_name)
+
+    for cat in categories:
+        for book in df[cat].dropna().tolist():
+
+            existing = normalize(book)
+
+            if new_name == existing:
+                return book, cat, 100
+
+            score = fuzz.ratio(new_name, existing)
+            if score >= threshold:
+                return book, cat, score
+
+    return None, None, 0
+
+# =====================
 # TABS
 # =====================
 library_tab, search_tab, add_tab = st.tabs(
@@ -186,11 +213,13 @@ with search_tab:
 
     if keyword:
 
+        keyword_lower = keyword.lower()
+
         results = [
             (book, cat)
             for cat in categories
             for book in df[cat].dropna().tolist()
-            if keyword.lower() in str(book).lower()
+            if keyword_lower in str(book).lower()
         ]
 
         st.write(f"找到 {len(results)} 本书")
@@ -212,6 +241,7 @@ with search_tab:
                 <small>📂 {cat}</small>
             </div>
             """, unsafe_allow_html=True)
+
 # =====================
 # ADD TAB
 # =====================
@@ -222,44 +252,6 @@ with add_tab:
     new_book = st.text_input("书名", key="new_book")
     category = st.selectbox("种类", categories, key="add_category")
 
-    # =====================
-    # NORMALIZATION FUNCTION
-    # =====================
-    def normalize(text):
-        return (
-            str(text)
-            .strip()
-            .lower()
-            .replace(" ", "")
-        )
-
-    # =====================
-    # SMART DUPLICATE CHECK
-    # =====================
-    def find_duplicate(book_name, df, threshold=85):
-
-        new_name = normalize(book_name)
-
-        for cat in categories:
-            for book in df[cat].dropna().tolist():
-
-                existing = normalize(book)
-
-                # 1. exact match
-                if new_name == existing:
-                    return book, cat, 100
-
-                # 2. fuzzy match
-                score = fuzz.ratio(new_name, existing)
-
-                if score >= threshold:
-                    return book, cat, score
-
-        return None, None, 0
-
-    # =====================
-    # ADD BUTTON
-    # =====================
     if st.button("确定添加", use_container_width=True):
 
         if not new_book.strip():
@@ -267,11 +259,9 @@ with add_tab:
 
         else:
 
-            # 🔍 SMART DUPLICATE CHECK
             found_book, found_cat, score = find_duplicate(new_book, df)
 
             if found_book:
-
                 st.error(
                     f"❌ 检测到重复书籍\n\n"
                     f"📖 已存在: {found_book}\n"
@@ -280,7 +270,6 @@ with add_tab:
                 )
 
             else:
-
                 headers = sheet.row_values(1)
                 col_index = headers.index(category) + 1
                 next_row = len(sheet.col_values(col_index)) + 1
