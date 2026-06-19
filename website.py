@@ -141,16 +141,16 @@ st.markdown(
 # =====================
 # MAIN TITLE
 # =====================
+# =====================
+# MAIN TITLE
+# =====================
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
 
-st.metric("📚 图书总数", total_books)
+search = ""
 
-main_tab, search_tab, add_tab = st.tabs([
-    "📚 图书馆",
-    "🔍 搜索书本",
-    "➕ 添加书本"
-])
-
+library_tab, search_tab, add_tab = st.tabs(
+    ["📚 图书馆", "🔍 搜索书本", "➕ 添加书本"]
+)
 # =====================
 # CATEGORY TABS
 # =====================
