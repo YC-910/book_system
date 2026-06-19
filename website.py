@@ -6,87 +6,29 @@ from google.oauth2.service_account import Credentials
 # =====================
 # PAGE CONFIG
 # =====================
-st.set_page_config(page_title="📚 藏书记录", layout="wide", initial_sidebar_state="expanded")
-
-# =====================
-# GOOGLE AUTH
-# =====================
-scope = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
-]
-
-service_account_info = dict(st.secrets["gcp_service_account"])
-service_account_info["private_key"] = service_account_info["private_key"].replace(
-    "\\n", "\n"
+st.set_page_config(
+    page_title="📚 藏书记录",
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-creds = Credentials.from_service_account_info(service_account_info, scopes=scope)
-
-client = gspread.authorize(creds)
-
 # =====================
-# SHEET
+# HIDE STREAMLIT UI ELEMENTS
 # =====================
-SHEET_ID = "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
-sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
-
-# =====================
-# LOAD DATA
-# =====================
-@st.cache_data(ttl=60)
-def load_data():
-    data = sheet.get_all_values()
-
-    if not data:
-        return pd.DataFrame()
-
-    df = pd.DataFrame(data)
-    df.columns = df.iloc[0]
-    df = df[1:]
-    df = df.replace(r"^\s*$", pd.NA, regex=True)
-
-    return df
-
-df = load_data()
-categories = df.columns.tolist()
-
-# =====================
-# BOOK COUNT
-# =====================
-def count_books(col):
-    return df[col].dropna().shape[0]
-
-total_books = sum(count_books(c) for c in categories)
-
-# =====================
-# STYLES
-# =====================
-st.markdown(
-    """
+st.markdown("""
 <style>
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}
 
-    /* Hide top-right menu */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
+div[data-testid="stToolbar"] {
+    display: none;
+}
 
-    /* Hide toolbar (edit/share/github) */
-    div[data-testid="stToolbar"] {
-        display: none;
-    }
+div[data-testid="stStatusWidget"] {
+    display: none;
+}
 
-    /* Try to reduce bottom-right floating menu */
-    div[data-testid="stStatusWidget"] {
-        display: none;
-    }
-
-    /* Hide deploy / manage button area (best effort only) */
-    #stNotificationFrame {
-        display: none;
-    }
-
-/* ===== BACKGROUND ===== */
 .stApp{
     background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
     background-size: cover;
@@ -95,12 +37,10 @@ st.markdown(
     background-attachment: fixed;
 }
 
-/* ===== LAYOUT ===== */
 .main .block-container{
     padding: 1rem 2.5rem;
 }
 
-/* ===== TITLE ===== */
 .title{
     text-align:center;
     font-size:56px;
@@ -109,7 +49,6 @@ st.markdown(
     color:#ffffff;
 }
 
-/* ===== GRID ===== */
 .book-grid{
     display:grid;
     grid-template-columns: repeat(6, 1fr);
@@ -117,7 +56,6 @@ st.markdown(
     margin-top: 14px;
 }
 
-/* ===== BOOK CARD ===== */
 .book-card{
     background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(10px);
@@ -144,7 +82,6 @@ st.markdown(
     border: 1px solid rgba(120,180,255,0.5);
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px){
     .book-grid{ grid-template-columns: repeat(4, 1fr); }
 }
@@ -152,28 +89,68 @@ st.markdown(
 @media (max-width: 800px){
     .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
-
 </style>
-""",
-    unsafe_allow_html=True,
+""", unsafe_allow_html=True)
+
+# =====================
+# GOOGLE SHEET AUTH
+# =====================
+scope = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
+
+service_account_info = dict(st.secrets["gcp_service_account"])
+service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
+
+creds = Credentials.from_service_account_info(
+    service_account_info,
+    scopes=scope
 )
 
+client = gspread.authorize(creds)
+
+SHEET_ID = "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
+sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
+
 # =====================
-# MAIN TITLE
+# LOAD DATA
+# =====================
+@st.cache_data(ttl=60)
+def load_data():
+    data = sheet.get_all_values()
+    if not data:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(data)
+    df.columns = df.iloc[0]
+    df = df[1:]
+    df = df.replace(r"^\s*$", pd.NA, regex=True)
+    return df
+
+df = load_data()
+categories = df.columns.tolist()
+
+# =====================
+# BOOK COUNT
+# =====================
+total_books = sum(df[c].dropna().shape[0] for c in categories)
+
+# =====================
+# UI HEADER
 # =====================
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
-
 st.metric("📚 图书总数", total_books)
 
 # =====================
-# MAIN TABS
+# TABS
 # =====================
 library_tab, search_tab, add_tab = st.tabs(
     ["📚 图书馆", "🔍 搜索书本", "➕ 添加书本"]
 )
 
 # =====================
-# LIBRARY TAB
+# LIBRARY
 # =====================
 with library_tab:
 
@@ -185,118 +162,83 @@ with library_tab:
 
             books = df[cat].dropna().tolist()
 
-            st.subheader(f"📂 {cat}")
-            st.markdown(f"### 📚 共: {len(books)} 本")
+            st.subheader(cat)
+            st.write(f"📚 共: {len(books)} 本")
 
             if not books:
                 st.info("No books found")
                 continue
 
             html = '<div class="book-grid">'
-
             for book in books:
                 html += f'<div class="book-card">📖 {book}</div>'
-
             html += "</div>"
 
             st.markdown(html, unsafe_allow_html=True)
 
 # =====================
-# SEARCH TAB
+# SEARCH
 # =====================
 with search_tab:
 
     st.subheader("🔍 搜索书本")
 
-    search = st.text_input(
-        "输入书名",
-        placeholder="法医"
-    )
+    keyword = st.text_input("输入书名", placeholder="例如：法医")
 
-    if search:
+    if keyword:
 
         results = []
 
         for cat in categories:
-
-            books = df[cat].dropna().tolist()
-
-            for book in books:
-
-                if search.lower() in str(book).lower():
+            for book in df[cat].dropna().tolist():
+                if keyword.lower() in str(book).lower():
                     results.append((book, cat))
 
-        st.markdown(f"### 找到 {len(results)} 本书")
+        st.write(f"找到 {len(results)} 本书")
 
         if not results:
-
             st.warning("没有找到相关书籍")
 
-        else:
-
-            for book, cat in results:
-
-                st.markdown(
-                    f"""
-                    <div style="
-                        background:rgba(255,255,255,0.88);
-                        padding:12px;
-                        border-radius:12px;
-                        margin-bottom:10px;
-                        color:black;
-                        font-weight:600;
-                    ">
-                        📖 {book}
-                        <br>
-                        <small>📂 {cat}</small>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+        for book, cat in results:
+            st.markdown(f"""
+            <div style="
+                background:rgba(255,255,255,0.88);
+                padding:12px;
+                border-radius:12px;
+                margin-bottom:10px;
+                color:black;
+                font-weight:600;
+            ">
+                📖 {book}<br>
+                <small>📂 {cat}</small>
+            </div>
+            """, unsafe_allow_html=True)
 
 # =====================
-# ADD BOOK TAB
+# ADD BOOK
 # =====================
 with add_tab:
 
     st.subheader("➕ 添加书本")
 
-    new_book = st.text_input(
-        "书名",
-        key="new_book"
-    )
+    new_book = st.text_input("书名", key="new_book")
 
-    category = st.selectbox(
-        "种类",
-        categories,
-        key="add_category"
-    )
+    category = st.selectbox("种类", categories, key="add_category")
 
-    if st.button(
-        "确定添加",
-        use_container_width=True
-    ):
+    if st.button("确定添加", use_container_width=True):
 
-        if not new_book.strip():
-
-            st.warning("请输入书名")
-
-        else:
+        if new_book.strip():
 
             headers = sheet.row_values(1)
-
             col_index = headers.index(category) + 1
-
             next_row = len(sheet.col_values(col_index)) + 1
 
-            sheet.update_cell(
-                next_row,
-                col_index,
-                new_book
-            )
+            sheet.update_cell(next_row, col_index, new_book)
 
             st.success(f"✅ 已添加：《{new_book}》")
 
             st.cache_data.clear()
-
             st.rerun()
+
+        else:
+            st.warning("请输入书名")
