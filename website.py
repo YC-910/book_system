@@ -7,6 +7,13 @@ import easyocr
 from PIL import Image
 import numpy as np
 
+reader = easyocr.Reader(['en'], gpu=False)
+
+def extract_text(image):
+    img = np.array(image)
+    result = reader.readtext(img, detail=0)
+    return " ".join(result)
+
 # =====================
 # PAGE CONFIG
 # =====================
