@@ -224,18 +224,45 @@ with add_tab:
 
     if st.button("确定添加", use_container_width=True):
 
-        if new_book.strip():
-
-            headers = sheet.row_values(1)
-            col_index = headers.index(category) + 1
-            next_row = len(sheet.col_values(col_index)) + 1
-
-            sheet.update_cell(next_row, col_index, new_book)
-
-            st.success(f"✅ 已添加：《{new_book}》")
-
-            st.cache_data.clear()
-            st.rerun()
+        if not new_book.strip():
+            st.warning("请输入书名")
 
         else:
-            st.warning("请输入书名")
+
+            # ==============================
+            # CHECK DUPLICATE ACROSS SHEETS
+            # ==============================
+            found = None
+
+            for cat in categories:
+                books = df[cat].dropna().tolist()
+
+                for book in books:
+                    if new_book.strip().lower() == str(book).strip().lower():
+                        found = cat
+                        break
+
+                if found:
+                    break
+
+            # ==============================
+            # IF EXISTS → BLOCK
+            # ==============================
+            if found:
+                st.error(f"❌ 你已经在「{found}」类别中添加过这本书：《{new_book}》")
+
+            # ==============================
+            # IF NOT EXISTS → SAVE
+            # ==============================
+            else:
+
+                headers = sheet.row_values(1)
+                col_index = headers.index(category) + 1
+                next_row = len(sheet.col_values(col_index)) + 1
+
+                sheet.update_cell(next_row, col_index, new_book)
+
+                st.success(f"✅ 已添加：《{new_book}》")
+
+                st.cache_data.clear()
+                st.rerun()
