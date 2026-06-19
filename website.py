@@ -86,7 +86,6 @@ div[data-testid="stStatusWidget"] { display: none; }
 @media (max-width: 800px){
     .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -108,8 +107,9 @@ creds = Credentials.from_service_account_info(
 
 client = gspread.authorize(creds)
 
-SHEET_ID = "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
-sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
+sheet = client.open_by_key(
+    "1c8t964bqcoMl1BlSTrijp2QLBXXAH-58AlEZbCBtT0Q"
+).worksheet("纸质书")
 
 # =====================
 # LOAD DATA
@@ -126,23 +126,24 @@ def load_data():
     df = df.replace(r"^\s*$", pd.NA, regex=True)
     return df
 
-
 df = load_data()
 categories = df.columns.tolist()
 
 # =====================
-# INDEX BUILD
+# NORMALIZE
 # =====================
 def normalize(text):
     return str(text).strip().lower().replace(" ", "")
 
+# =====================
+# INDEX BUILD
+# =====================
 book_index = {}
 inverted_index = defaultdict(set)
 
 for cat in categories:
     for book in df[cat].dropna().tolist():
         key = normalize(book)
-
         book_index[key] = (book, cat)
 
         for ch in key:
@@ -163,7 +164,7 @@ def find_duplicate(book_name, threshold=85):
     key = normalize(book_name)
 
     if key in book_index:
-        return book_index[key][0], book_index[key][1], 100
+        return (*book_index[key], 100)
 
     candidates = set()
     for ch in key:
