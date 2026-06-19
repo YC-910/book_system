@@ -140,7 +140,7 @@ total_books = sum(df[c].dropna().shape[0] for c in categories)
 # UI HEADER
 # =====================
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
-st.metric("📚 图书总数", total_books)
+st.metric("📚 图书总数", total_books, "本")
 
 # =====================
 # TABS
