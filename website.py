@@ -275,14 +275,19 @@ with search_tab:
             """, unsafe_allow_html=True)
 
 # =====================
-# ADD TAB (SMART DUPLICATE CHECK)
+# ADD TAB
 # =====================
 with add_tab:
 
     st.subheader("➕ 添加书本")
 
-    new_book = st.text_input("书名", key="new_book")
-    category = st.selectbox("种类", categories, key="add_category")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        new_book = st.text_input("书名", key="new_book")
+
+    with col2:
+        category = st.selectbox("种类", categories, key="add_category")
 
     if st.button("确定添加", use_container_width=True):
 
@@ -291,7 +296,7 @@ with add_tab:
 
         else:
 
-            found_book, found_cat, score = find_duplicate(new_book)
+            found_book, found_cat, score = find_duplicate(new_book, df)
 
             if found_book:
                 st.error(
