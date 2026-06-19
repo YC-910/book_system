@@ -21,13 +21,8 @@ st.markdown("""
 header {visibility: hidden;}
 footer {visibility: hidden;}
 
-div[data-testid="stToolbar"] {
-    display: none;
-}
-
-div[data-testid="stStatusWidget"] {
-    display: none;
-}
+div[data-testid="stToolbar"] { display: none; }
+div[data-testid="stStatusWidget"] { display: none; }
 
 .stApp{
     background: url("https://raw.githubusercontent.com/YC-910/book_system/refs/heads/Python/aquarius.png");
@@ -95,7 +90,7 @@ div[data-testid="stStatusWidget"] {
 # =====================
 # GOOGLE SHEET AUTH
 # =====================
-scope = [
+SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
@@ -105,7 +100,7 @@ service_account_info["private_key"] = service_account_info["private_key"].replac
 
 creds = Credentials.from_service_account_info(
     service_account_info,
-    scopes=scope
+    scopes=SCOPE
 )
 
 client = gspread.authorize(creds)
@@ -119,6 +114,7 @@ sheet = client.open_by_key(SHEET_ID).worksheet("纸质书")
 @st.cache_data(ttl=60)
 def load_data():
     data = sheet.get_all_values()
+
     if not data:
         return pd.DataFrame()
 
@@ -126,7 +122,9 @@ def load_data():
     df.columns = df.iloc[0]
     df = df[1:]
     df = df.replace(r"^\s*$", pd.NA, regex=True)
+
     return df
+
 
 df = load_data()
 categories = df.columns.tolist()
@@ -150,7 +148,7 @@ library_tab, search_tab, add_tab = st.tabs(
 )
 
 # =====================
-# LIBRARY
+# LIBRARY TAB
 # =====================
 with library_tab:
 
@@ -177,7 +175,7 @@ with library_tab:
             st.markdown(html, unsafe_allow_html=True)
 
 # =====================
-# SEARCH
+# SEARCH TAB
 # =====================
 with search_tab:
 
@@ -187,12 +185,12 @@ with search_tab:
 
     if keyword:
 
-        results = []
-
-        for cat in categories:
-            for book in df[cat].dropna().tolist():
-                if keyword.lower() in str(book).lower():
-                    results.append((book, cat))
+        results = [
+            (book, cat)
+            for cat in categories
+            for book in df[cat].dropna().tolist()
+            if keyword.lower() in str(book).lower()
+        ]
 
         st.write(f"找到 {len(results)} 本书")
 
@@ -215,14 +213,13 @@ with search_tab:
             """, unsafe_allow_html=True)
 
 # =====================
-# ADD BOOK
+# ADD TAB
 # =====================
 with add_tab:
 
     st.subheader("➕ 添加书本")
 
     new_book = st.text_input("书名", key="new_book")
-
     category = st.selectbox("种类", categories, key="add_category")
 
     if st.button("确定添加", use_container_width=True):
