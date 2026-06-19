@@ -3,7 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from rapidfuzz import fuzz
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 # =====================
 # PAGE CONFIG
@@ -59,32 +59,18 @@ div[data-testid="stStatusWidget"] { display: none; }
     border-radius:18px;
     padding:20px;
     height:150px;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     font-size:18px;
     font-weight:800;
     color:#111827;
-
     box-shadow:0px 10px 30px rgba(0,0,0,0.15);
     border: 1px solid rgba(255,255,255,0.6);
-    transition:0.3s ease;
 }
 
 .book-card:hover{
     transform: translateY(-6px);
-    box-shadow: 0 15px 35px rgba(120,180,255,0.25);
-    border: 1px solid rgba(120,180,255,0.5);
-}
-
-@media (max-width: 1200px){
-    .book-grid{ grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (max-width: 800px){
-    .book-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -117,7 +103,6 @@ sheet = client.open_by_key(
 @st.cache_data(ttl=60)
 def load_data():
     data = sheet.get_all_values()
-
     if not data:
         return pd.DataFrame()
 
@@ -125,9 +110,7 @@ def load_data():
     df.columns = df.iloc[0]
     df = df[1:]
     df = df.replace(r"^\s*$", pd.NA, regex=True)
-
     return df
-
 
 df = load_data()
 categories = df.columns.tolist()
@@ -139,63 +122,58 @@ def normalize(text):
     return str(text).strip().lower().replace(" ", "")
 
 # =====================
-# INDEX BUILD
+# INDEX (FAST SEARCH)
 # =====================
 book_index = {}
-inverted_index = defaultdict(set)
+all_books = []
 
 for cat in categories:
     for book in df[cat].dropna().tolist():
         key = normalize(book)
-
         book_index[key] = (book, cat)
-
-        for ch in key:
-            inverted_index[ch].add((book, cat))
+        all_books.append((book, cat))
 
 # =====================
-# COUNT
+# SIMPLE ANALYTICS (DA LAYER)
 # =====================
-total_books = sum(df[c].dropna().shape[0] for c in categories)
+category_counts = {cat: df[cat].dropna().shape[0] for cat in categories}
+total_books = sum(category_counts.values())
 
+search_history = Counter()
+
+# =====================
+# HEADER
+# =====================
 st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True)
 st.metric("📚 图书总数", total_books)
 
 # =====================
-# DUPLICATE CHECK
+# RANKED SEARCH ENGINE (V2)
 # =====================
-def find_duplicate(book_name, threshold=85):
-    key = normalize(book_name)
+def search_books(keyword):
+    key = normalize(keyword)
 
-    if key in book_index:
-        return (*book_index[key], 100)
+    results = []
 
-    candidates = set()
+    for book, cat in all_books:
+        score = fuzz.partial_ratio(key, normalize(book))  # better for search
+        if key in normalize(book):
+            score += 30
 
-    for ch in key:
-        candidates.update(inverted_index.get(ch, set()))
+        results.append((score, book, cat))
 
-    best, best_score = None, 0
-
-    for book, cat in candidates:
-        score = fuzz.ratio(key, normalize(book))
-        if score > best_score:
-            best, best_score = (book, cat), score
-
-    if best_score >= threshold:
-        return best[0], best[1], best_score
-
-    return None, None, 0
+    results.sort(reverse=True, key=lambda x: x[0])
+    return results[:50]
 
 # =====================
 # TABS
 # =====================
-library_tab, search_tab, add_tab = st.tabs(
-    ["📚 图书馆", "🔍 搜索书本", "➕ 添加书本"]
+library_tab, search_tab, add_tab, analytics_tab = st.tabs(
+    ["📚 图书馆", "🔍 搜索书本", "➕ 添加书本", "📊 数据分析"]
 )
 
 # =====================
-# LIBRARY TAB
+# LIBRARY
 # =====================
 with library_tab:
     category_tabs = st.tabs(categories)
@@ -207,19 +185,11 @@ with library_tab:
             st.subheader(cat)
             st.write(f"📚 共: {len(books)} 本")
 
-            if not books:
-                st.info("No books found")
-                continue
-
-            html = '<div class="book-grid">'
             for book in books:
-                html += f'<div class="book-card">📖 {book}</div>'
-            html += "</div>"
-
-            st.markdown(html, unsafe_allow_html=True)
+                st.markdown(f"📖 {book}")
 
 # =====================
-# SEARCH TAB
+# SEARCH (RANKED V2)
 # =====================
 with search_tab:
     st.subheader("🔍 搜索书本")
@@ -227,27 +197,16 @@ with search_tab:
     keyword = st.text_input("输入书名", placeholder="例如：法医")
 
     if keyword:
-        key = normalize(keyword)
+        search_history[keyword] += 1
 
-        results = set()
-
-        for ch in key:
-            results.update(inverted_index.get(ch, set()))
-
-        if not results:
-            results = [
-                (book, cat)
-                for cat in categories
-                for book in df[cat].dropna().tolist()
-                if key in normalize(book)
-            ]
+        results = search_books(keyword)
 
         st.write(f"找到 {len(results)} 本书")
 
         if not results:
             st.warning("没有找到相关书籍")
 
-        for book, cat in results:
+        for score, book, cat in results:
             st.markdown(f"""
             <div style="
                 background:rgba(255,255,255,0.88);
@@ -255,15 +214,15 @@ with search_tab:
                 border-radius:12px;
                 margin-bottom:10px;
                 color:black;
-                font-weight:600;
             ">
-                📖 {book}<br>
-                <small>📂 {cat}</small>
+                📖 {book} <br>
+                📊 Score: {score:.1f} <br>
+                📂 {cat}
             </div>
             """, unsafe_allow_html=True)
 
 # =====================
-# ADD TAB
+# ADD
 # =====================
 with add_tab:
 
@@ -279,27 +238,31 @@ with add_tab:
 
     if st.button("确定添加", use_container_width=True):
 
-        if not new_book.strip():
-            st.warning("请输入书名")
+        if new_book.strip():
+            headers = sheet.row_values(1)
+            col_index = headers.index(category) + 1
+            next_row = len(sheet.col_values(col_index)) + 1
 
-        else:
-            found_book, found_cat, score = find_duplicate(new_book)
+            sheet.update_cell(next_row, col_index, new_book)
 
-            if found_book:
-                st.error(
-                    f"❌ 检测到重复书籍\n\n"
-                    f"📖 已存在: {found_book}\n"
-                    f"📂 类别: {found_cat}\n"
-                    f"📊 相似度: {score:.1f}%"
-                )
-            else:
-                headers = sheet.row_values(1)
-                col_index = headers.index(category) + 1
-                next_row = len(sheet.col_values(col_index)) + 1
+            st.success(f"✅ 已添加：《{new_book}》")
+            st.cache_data.clear()
+            st.rerun()
 
-                sheet.update_cell(next_row, col_index, new_book)
+# =====================
+# 📊 ANALYTICS TAB (DA SYSTEM)
+# =====================
+with analytics_tab:
 
-                st.success(f"✅ 已添加：《{new_book}》")
+    st.subheader("📊 数据分析")
 
-                st.cache_data.clear()
-                st.rerun()
+    st.write("### 📚 分类统计")
+    st.bar_chart(category_counts)
+
+    st.write("### 🔥 热门搜索词")
+    st.bar_chart(search_history)
+
+    st.write("### 📈 总览")
+    st.metric("Total Books", total_books)
+    st.metric("Categories", len(categories))
+    st.metric("Search Terms", len(search_history))
