@@ -3,6 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from rapidfuzz import fuzz
+from collections import defaultdict
 
 # =====================
 # PAGE CONFIG
@@ -126,8 +127,29 @@ def load_data():
 
     return df
 
+
 df = load_data()
 categories = df.columns.tolist()
+
+# =====================
+# 🚀 BUILD GOOGLE-LEVEL INDEX
+# =====================
+def normalize(text):
+    return str(text).strip().lower().replace(" ", "")
+
+book_index = {}                  # O(1) exact search
+inverted_index = defaultdict(set)  # fast keyword search
+
+for cat in categories:
+    for book in df[cat].dropna().tolist():
+
+        key = normalize(book)
+
+        book_index[key] = (book, cat)
+
+        # keyword index (Chinese-friendly: char-based)
+        for ch in key:
+            inverted_index[ch].add((book, cat))
 
 # =====================
 # BOOK COUNT
@@ -141,29 +163,33 @@ st.markdown('<div class="title">📚 藏书记录</div>', unsafe_allow_html=True
 st.metric("📚 图书总数", total_books)
 
 # =====================
-# NORMALIZATION
+# 🚀 FAST DUPLICATE CHECK (O(1) + small fallback)
 # =====================
-def normalize(text):
-    return str(text).strip().lower().replace(" ", "")
+def find_duplicate(book_name, threshold=85):
 
-# =====================
-# SMART DUPLICATE CHECK
-# =====================
-def find_duplicate(book_name, df, threshold=85):
+    key = normalize(book_name)
 
-    new_name = normalize(book_name)
+    # 1. O(1) exact match
+    if key in book_index:
+        return book_index[key][0], book_index[key][1], 100
 
-    for cat in categories:
-        for book in df[cat].dropna().tolist():
+    # 2. candidate search (fast)
+    candidates = set()
+    for ch in key:
+        candidates.update(inverted_index.get(ch, set()))
 
-            existing = normalize(book)
+    # 3. fuzzy only on small subset
+    best = None
+    best_score = 0
 
-            if new_name == existing:
-                return book, cat, 100
+    for book, cat in candidates:
+        score = fuzz.ratio(key, normalize(book))
+        if score > best_score:
+            best = (book, cat)
+            best_score = score
 
-            score = fuzz.ratio(new_name, existing)
-            if score >= threshold:
-                return book, cat, score
+    if best_score >= threshold:
+        return best[0], best[1], best_score
 
     return None, None, 0
 
@@ -175,7 +201,7 @@ library_tab, search_tab, add_tab = st.tabs(
 )
 
 # =====================
-# LIBRARY TAB
+# LIBRARY TAB (UNCHANGED UI)
 # =====================
 with library_tab:
 
@@ -202,7 +228,7 @@ with library_tab:
             st.markdown(html, unsafe_allow_html=True)
 
 # =====================
-# SEARCH TAB
+# SEARCH TAB (UPGRADED ENGINE)
 # =====================
 with search_tab:
 
@@ -212,14 +238,21 @@ with search_tab:
 
     if keyword:
 
-        keyword_lower = keyword.lower()
+        key = normalize(keyword)
 
-        results = [
-            (book, cat)
-            for cat in categories
-            for book in df[cat].dropna().tolist()
-            if keyword_lower in str(book).lower()
-        ]
+        # FAST SEARCH via index
+        results = set()
+        for ch in key:
+            results.update(inverted_index.get(ch, set()))
+
+        # fallback: substring scan
+        if not results:
+            results = [
+                (book, cat)
+                for cat in categories
+                for book in df[cat].dropna().tolist()
+                if key in normalize(book)
+            ]
 
         st.write(f"找到 {len(results)} 本书")
 
@@ -242,7 +275,7 @@ with search_tab:
             """, unsafe_allow_html=True)
 
 # =====================
-# ADD TAB
+# ADD TAB (SMART DUPLICATE CHECK)
 # =====================
 with add_tab:
 
@@ -258,7 +291,7 @@ with add_tab:
 
         else:
 
-            found_book, found_cat, score = find_duplicate(new_book, df)
+            found_book, found_cat, score = find_duplicate(new_book)
 
             if found_book:
                 st.error(
