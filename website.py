@@ -224,23 +224,52 @@ with library_tab:
 with search_tab:
     st.subheader("🔍 搜索书本")
 
-    keyword = st.text_input("输入书名", placeholder="例如：法医")
+    keyword = st.text_input("输入书名", placeholder="例如：法医专家")
 
     if keyword:
         key = normalize(keyword)
 
-        results = set()
+        exact_results = []
+        contains_results = []
+        fuzzy_results = []
 
-        for ch in key:
-            results.update(inverted_index.get(ch, set()))
+        # 1️⃣ Exact match first
+        for cat in categories:
+            for book in df[cat].dropna().tolist():
+                book_key = normalize(book)
 
-        if not results:
-            results = [
-                (book, cat)
-                for cat in categories
-                for book in df[cat].dropna().tolist()
-                if key in normalize(book)
-            ]
+                if book_key == key:
+                    exact_results.append((book, cat))
+
+        # 2️⃣ If no exact match, use contains search
+        if exact_results:
+            results = exact_results
+        else:
+            for cat in categories:
+                for book in df[cat].dropna().tolist():
+                    book_key = normalize(book)
+
+                    if key in book_key:
+                        contains_results.append((book, cat))
+
+            if contains_results:
+                results = contains_results
+            else:
+                # 3️⃣ If still no result, use fuzzy search
+                for cat in categories:
+                    for book in df[cat].dropna().tolist():
+                        score = fuzz.ratio(key, normalize(book))
+
+                        if score >= 70:
+                            fuzzy_results.append((book, cat, score))
+
+                fuzzy_results = sorted(
+                    fuzzy_results,
+                    key=lambda x: x[2],
+                    reverse=True
+                )
+
+                results = [(book, cat) for book, cat, score in fuzzy_results[:10]]
 
         st.write(f"找到 {len(results)} 本书")
 
